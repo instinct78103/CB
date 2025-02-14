@@ -1,0 +1,150 @@
+:root {
+    --gap: 20px;
+}
+
+*, :before, :after {
+    font-family: 'Open Sans', sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-size: 16px;
+}
+
+li {
+    list-style: none;
+}
+
+h3 {
+    text-align: center;
+    padding: 10px;
+    background: #014785;
+    color: #fff;
+    text-transform: uppercase;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+
+    & + ul {
+        padding-block: 20px 0;
+    }
+}
+
+div:has(>h3) {
+    display: grid;
+    align-self: flex-start;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 3fr minmax(250px, 1fr);
+    gap: var(--gap);
+    padding: 20px;
+    max-width: 1120px;
+    margin-inline: auto;
+}
+
+.column-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.column-total {
+    position: sticky;
+    top: 20px;
+
+    .selection {
+        display: grid;
+        grid-template-columns: 1fr fit-content(100%);
+        gap: 10px;
+        text-wrap: balance;
+
+        > li {
+            display: grid;
+            grid-template-columns: subgrid;
+            grid-column: span 2;
+            align-items: flex-end;
+        }
+
+        span + span {
+            justify-self: flex-end;
+            font-weight: 600;
+        }
+
+        &:not(.total) {
+            border-bottom: 1px solid #e3e3e3;
+        }
+    }
+
+    .total {
+        padding-block: 15px;
+    }
+
+    > *:not(h3) {
+        padding: 10px;
+    }
+}
+
+.upgrades {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+
+    > li {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+    }
+}
+
+.product-name {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.product-price {
+    color: #ff5c49;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.product-desc {
+    text-wrap: pretty;
+}
+
+label:before {
+    content: '';
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #014785;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+}
+
+label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+
+    > div {
+        width: 100%;
+    }
+
+    &:has(:is(input[type="checkbox"]:checked, input[type="radio"]:checked)) {
+        &:before {
+            background-image: url('/icons/f058.svg');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+    }
+}
+
+.list-heading {
+    font-size: 14px;
+    font-weight: 600;
+}
