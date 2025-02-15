@@ -7,10 +7,12 @@ export default function App() {
   const [regionId, setRegionId] = useState(null);
   const [products, setProducts] = useState([]);
   const [desc, setDesc] = useState('');
+  const [minSum, setMinSum] = useState(0);
+
   const [upgrades, setUpgrades] = useState([]);
   const [selectedUpgrades, setSelectedUpgrades] = useState([]);
-  const [minSum, setMinSum] = useState(0);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
 
   useEffect(() => {
     const currentState = new URL(window.location).searchParams.get('st');
@@ -47,7 +49,7 @@ export default function App() {
         setDesc(doc.body.textContent.trim() || '');
 
       } catch (e) {
-        console.warn('Error 2');
+        console.warn('Error: ' + e);
       } finally {
         setLoading(false);
       }
@@ -65,94 +67,141 @@ export default function App() {
     );
   };
 
+  const toggleDelivery = item => {
+    setSelectedDeliveryOption(deliveryOptions?.length ? item : null);
+  };
+
   useEffect(() => {
-    setDeliveryOptions(selectedUpgrades.filter(s => s.ShipOptions));
+
+    const availableDeliveryOptions = selectedUpgrades
+      .filter(s => s.ShipOptions)
+      .map(e => e.ShipOptions)
+      .flat(1);
+
+    setDeliveryOptions(availableDeliveryOptions);
+
+    if (!availableDeliveryOptions?.length) {
+      setSelectedDeliveryOption(null);
+    }
   }, [selectedUpgrades]);
 
-  const totalPrice = selectedUpgrades.reduce((sum, item) => sum + item.PriceCart, minSum);
+  const totalPrice = selectedUpgrades.reduce((sum, item) => sum + item.PriceCart, minSum) + (selectedDeliveryOption?.AdjustedPrice || 0);
 
   if (loading) return (<p>Loading...</p>);
 
   return (
-    <div className={'grid'}>
-      <div className={'column-showcase'}>
+    <>
+      <div className={'grid'}>
+        <div className={'column-showcase'}>
 
-        {products?.length > 0 && (
-          <div>
-            <h3>Courses Selection</h3>
-            <ul>
-              <li>
-                {products.map((product) => (
-                  <label key={product.ProductID}>
-                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-between' }}>
-                      <input style={{ display: 'none' }} type="radio" checked />
-                      <p className={'product-name'}>{product.Name}</p>
-                      <p className={'product-price'}>${product.Price}</p>
-                    </div>
-                  </label>
-                ))}
-                <p className={'product-desc'}>{desc}</p>
-              </li>
-            </ul>
-          </div>
-        )}
-
-        {upgrades?.length > 0 && (
-          <div>
-            <h3>Upgrades Selection</h3>
-            <ul className={'upgrades'} style={{borderTop: '1px solid #c3c3c3'}}>
-              {upgrades.map(item => (
-                <li key={item.ProductID}>
-
-                  <label>
-                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'flex-start' }}>
-                      <input style={{ display: 'none' }}
-                             type="checkbox"
-                             onChange={() => toggleUpgrades(item)}
-                             checked={selectedUpgrades.some((i) => i.ProductID === item.ProductID)}
-                      />
-                      <p className={'product-name'}>{item.Name}</p>
-                      <p className={'product-price'} style={{ marginLeft: 'auto' }}>${item.PriceCart}</p>
-                    </div>
-                  </label>
-                  <p className={'product-desc'}>{item.Description}</p>
-
+          {products?.length > 0 && (
+            <div>
+              <h3>Courses Selection</h3>
+              <ul className={'products-list'}>
+                <li className={'item'}>
+                  {products.map((product) => (
+                    <label key={product.ProductID}>
+                      <div>
+                        <input style={{ display: 'none' }} type="radio" checked />
+                        <p className={'product-name'}>{product.Name}</p>
+                        <p className={'product-price'}>${product.Price}</p>
+                      </div>
+                    </label>
+                  ))}
+                  <p className={'product-desc'}>{desc}</p>
                 </li>
-              ))}
-            </ul>
+              </ul>
+            </div>
+          )}
+
+          {upgrades?.length > 0 && (
+            <div>
+              <h3>Upgrades Selection</h3>
+              <ul className={'products-list'}>
+                {upgrades.map(item => (
+                  <li key={item.ProductID} className={'item'}>
+
+                    <label>
+                      <div>
+                        <input style={{ display: 'none' }}
+                               type="checkbox"
+                               onChange={() => toggleUpgrades(item)}
+                               checked={selectedUpgrades.some(i => i.ProductID === item.ProductID)}
+                        />
+                        <p className={'product-name'}>{item.Name}</p>
+                        <p className={'product-price'}>${item.PriceCart}</p>
+                      </div>
+                    </label>
+                    <p className={'product-desc'}>{item.Description}</p>
+
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {deliveryOptions?.length > 0 && (
+            <div>
+              <h3>Certificate delivery for retail item</h3>
+              <ul className="products-list">
+                {deliveryOptions.map(option => (
+                  <li key={option.ShipMethodPriceID} className={'item'}>
+                    <label>
+                      <div>
+                        <input style={{ display: 'none' }} type="radio" name="delivery" onChange={() => toggleDelivery(option)} />
+                        <p className="product-name">{option.Text}</p>
+                        <p className="product-price">{option.AdjustedPrice ? `$${option.AdjustedPrice}` : 'FREE'}</p>
+                      </div>
+                    </label>
+                    <p className="product-desc">{option.Description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>)}
+        </div>
+        <div className={'column-total'}>
+          <h3>YOUR SELECTION</h3>
+          <div className="total-wrap">
+
+            {products?.length > 0 && (
+              <ul className={'selection'}>
+                <li className={'list-heading'}>Course</li>
+                {products.map((item) => <li key={item.ProductID}><span>{item.Name}</span><span>${item.Price}</span>
+                </li>)}
+              </ul>
+            )}
+
+            {selectedUpgrades?.length > 0 && (
+              <ul className={'selection'}>
+                <li className={'list-heading'}>Upgrades:</li>
+                {selectedUpgrades.map((item) => (
+                  <li key={item.Name}><span>{item.Name}</span><span>${item.PriceCart}</span></li>
+                ))}
+              </ul>
+            )}
+
+            {selectedDeliveryOption && deliveryOptions?.length > 0 && (
+              <ul className={'selection'}>
+                <li className="list-heading">Certification Delivery:</li>
+                <li>
+                  <span>{selectedDeliveryOption.Text}</span><span>{selectedDeliveryOption.AdjustedPrice ? `$${selectedDeliveryOption.AdjustedPrice}` : 'FREE'}</span>
+                </li>
+              </ul>
+            )}
+
+            {totalPrice > 0 && (
+              <p className={'selection total'}>
+                <span>TOTAL</span><span>${totalPrice.toFixed(2)}</span>
+              </p>
+            )}
+
           </div>
-        )}
-
-        {deliveryOptions?.length > 0 && <>{deliveryOptions.length}</>}
+        </div>
       </div>
-      <div className={'column-total'}>
-        <h3>YOUR SELECTION</h3>
-
-        {products?.length > 0 && (
-          <>
-            <ul className={'selection'}>
-              <li className={'list-heading'}>Course</li>
-              {products.map((item) => (
-                <li key={item.ProductID}><span>{item.Name}</span><span>${item.Price}</span></li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        {selectedUpgrades?.length > 0 && (
-          <>
-            <ul className={'selection'}>
-              <li className={'list-heading'}>Upgrades</li>
-              {selectedUpgrades.map((item) => (
-                <li key={item.Name}><span>{item.Name}</span><span>${item.PriceCart}</span></li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        <p className={'selection total'}>{totalPrice > 0 && <>
-          <span>TOTAL</span><span>${totalPrice.toFixed(2)}</span></>}</p>
+      <div className="grid">
+        <div className="column-showcase"></div>
+        <div className="column-total"><button className='next'>Next</button></div>
       </div>
-    </div>
+    </>
   );
 }

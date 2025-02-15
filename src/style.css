@@ -25,10 +25,21 @@ h3 {
     text-transform: uppercase;
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
+    font-weight: 400;
+}
 
-    & + ul {
-        padding-block: 20px 0;
-    }
+.next {
+    background: #f1685c;
+    border: none;
+    padding: 10px;
+    color: #fff;
+    width: 100%;
+}
+
+.products-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
 }
 
 div:has(>h3) {
@@ -40,8 +51,8 @@ div:has(>h3) {
     display: grid;
     grid-template-columns: 3fr minmax(250px, 1fr);
     gap: var(--gap);
-    padding: 20px;
-    max-width: 1120px;
+    padding-block: 20px;
+    width: min(1120px, calc(100% - 40px));
     margin-inline: auto;
 }
 
@@ -49,17 +60,32 @@ div:has(>h3) {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
+
+    > div {
+        width: 100%;
+        gap: var(--gap);
+    }
 }
 
 .column-total {
     position: sticky;
     top: 20px;
 
-    .selection {
+    .total-wrap {
+        border: 2px solid #9a9a9a;
+        border-top: none;
         display: grid;
         grid-template-columns: 1fr fit-content(100%);
+        gap: 0;
+    }
+
+    .selection {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: span 2;
         gap: 10px;
         text-wrap: balance;
+        padding: 10px;
 
         > li {
             display: grid;
@@ -79,12 +105,14 @@ div:has(>h3) {
     }
 
     .total {
-        padding-block: 15px;
+        padding-block: 10px;
     }
+}
 
-    > *:not(h3) {
-        padding: 10px;
-    }
+.item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
 }
 
 .upgrades {
@@ -109,6 +137,7 @@ div:has(>h3) {
     color: #ff5c49;
     font-weight: 600;
     font-size: 20px;
+    margin-left: auto;
 }
 
 .product-desc {
@@ -133,6 +162,9 @@ label {
 
     > div {
         width: 100%;
+        display: flex;
+        gap: var(--gap);
+        justify-content: flex-start;
     }
 
     &:has(:is(input[type="checkbox"]:checked, input[type="radio"]:checked)) {
