@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import './style.css';
+import { Total } from './components/Total.jsx';
+import { StepOne } from './components/StepOne.jsx';
+import { StepTwo } from './components/StepTwo.jsx';
 
 export default function App() {
 
   const [loading, setLoading] = useState(true);
   const [regionId, setRegionId] = useState(null);
+  const [step, setStep] = useState(1);
   const [products, setProducts] = useState([]);
   const [desc, setDesc] = useState('');
   const [minSum, setMinSum] = useState(0);
@@ -13,6 +17,8 @@ export default function App() {
   const [selectedUpgrades, setSelectedUpgrades] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
+
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
 
   useEffect(() => {
     const currentState = new URL(window.location).searchParams.get('st');
@@ -87,6 +93,18 @@ export default function App() {
 
   const totalPrice = selectedUpgrades.reduce((sum, item) => sum + item.PriceCart, minSum) + (selectedDeliveryOption?.AdjustedPrice || 0);
 
+  const handleNext = () => {
+    if (step === 1) {
+      setStep(2);
+    } else if (step === 2) {
+      if (!formData.firstName || !formData.lastName || !/\S+@\S+\.\S+/.test(formData.email) || !/^\d{10}$/.test(formData.phone)) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+      setStep(3);
+    }
+  };
+
   if (loading) return (<p>Loading...</p>);
 
   return (
@@ -94,113 +112,39 @@ export default function App() {
       <div className={'grid'}>
         <div className={'column-showcase'}>
 
-          {products?.length > 0 && (
-            <div>
-              <h3>Courses Selection</h3>
-              <ul className={'products-list'}>
-                <li className={'item'}>
-                  {products.map((product) => (
-                    <label key={product.ProductID}>
-                      <div>
-                        <input style={{ display: 'none' }} type="radio" checked />
-                        <p className={'product-name'}>{product.Name}</p>
-                        <p className={'product-price'}>${product.Price}</p>
-                      </div>
-                    </label>
-                  ))}
-                  <p className={'product-desc'}>{desc}</p>
-                </li>
-              </ul>
-            </div>
+          {step === 1 && (
+            <StepOne
+              products={products}
+              upgrades={upgrades}
+              desc={desc}
+              selectedUpgrades={selectedUpgrades}
+              deliveryOptions={deliveryOptions}
+              toggleUpgrades={toggleUpgrades}
+              toggleDelivery={toggleDelivery}
+            />
           )}
 
-          {upgrades?.length > 0 && (
-            <div>
-              <h3>Upgrades Selection</h3>
-              <ul className={'products-list'}>
-                {upgrades.map(item => (
-                  <li key={item.ProductID} className={'item'}>
-
-                    <label>
-                      <div>
-                        <input style={{ display: 'none' }}
-                               type="checkbox"
-                               onChange={() => toggleUpgrades(item)}
-                               checked={selectedUpgrades.some(i => i.ProductID === item.ProductID)}
-                        />
-                        <p className={'product-name'}>{item.Name}</p>
-                        <p className={'product-price'}>${item.PriceCart}</p>
-                      </div>
-                    </label>
-                    <p className={'product-desc'}>{item.Description}</p>
-
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {step === 2 && (
+            <StepTwo
+              formData={formData}
+              setFormData={setFormData}
+            />
           )}
 
-          {deliveryOptions?.length > 0 && (
-            <div>
-              <h3>Certificate delivery for retail item</h3>
-              <ul className="products-list">
-                {deliveryOptions.map(option => (
-                  <li key={option.ShipMethodPriceID} className={'item'}>
-                    <label>
-                      <div>
-                        <input style={{ display: 'none' }} type="radio" name="delivery" onChange={() => toggleDelivery(option)} />
-                        <p className="product-name">{option.Text}</p>
-                        <p className="product-price">{option.AdjustedPrice ? `$${option.AdjustedPrice}` : 'FREE'}</p>
-                      </div>
-                    </label>
-                    <p className="product-desc">{option.Description}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>)}
         </div>
-        <div className={'column-total'}>
-          <h3>YOUR SELECTION</h3>
-          <div className="total-wrap">
-
-            {products?.length > 0 && (
-              <ul className={'selection'}>
-                <li className={'list-heading'}>Course</li>
-                {products.map((item) => <li key={item.ProductID}><span>{item.Name}</span><span>${item.Price}</span>
-                </li>)}
-              </ul>
-            )}
-
-            {selectedUpgrades?.length > 0 && (
-              <ul className={'selection'}>
-                <li className={'list-heading'}>Upgrades:</li>
-                {selectedUpgrades.map((item) => (
-                  <li key={item.Name}><span>{item.Name}</span><span>${item.PriceCart}</span></li>
-                ))}
-              </ul>
-            )}
-
-            {selectedDeliveryOption && deliveryOptions?.length > 0 && (
-              <ul className={'selection'}>
-                <li className="list-heading">Certification Delivery:</li>
-                <li>
-                  <span>{selectedDeliveryOption.Text}</span><span>{selectedDeliveryOption.AdjustedPrice ? `$${selectedDeliveryOption.AdjustedPrice}` : 'FREE'}</span>
-                </li>
-              </ul>
-            )}
-
-            {totalPrice > 0 && (
-              <p className={'selection total'}>
-                <span>TOTAL</span><span>${totalPrice.toFixed(2)}</span>
-              </p>
-            )}
-
-          </div>
-        </div>
+        <Total
+          products={products}
+          selectedUpgrades={selectedUpgrades}
+          selectedDeliveryOption={selectedDeliveryOption}
+          deliveryOptions={deliveryOptions}
+          totalPrice={totalPrice}
+        />
       </div>
       <div className="grid">
         <div className="column-showcase"></div>
-        <div className="column-total"><button className='next'>Next</button></div>
+        <div className="column-total">
+          {step < 3 && <button className="next" onClick={handleNext}>Next</button>}
+        </div>
       </div>
     </>
   );

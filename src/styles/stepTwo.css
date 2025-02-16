@@ -1,0 +1,21 @@
+.column-showcase {
+    > div {
+        --gap: 14px;
+    }
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
+    display: block;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 12px;
+    border: 1px solid #ededed;
+    border-radius: 0;
+    vertical-align: middle;
+    box-shadow: none;
+    width: 100%;
+    background-color: #fff;
+    color: #7e828b;
+}
