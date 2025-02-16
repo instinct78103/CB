@@ -135,7 +135,9 @@ export default function App() {
           )}
 
           {step === 3 && (
-            <StepThree />
+            <StepThree
+              formData={formData}
+            />
           )}
 
         </div>
