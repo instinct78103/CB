@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import './style.css';
-import { Total } from './components/Total.jsx';
 import { StepOne } from './components/StepOne.jsx';
 import { StepTwo } from './components/StepTwo.jsx';
+import { StepThree } from './components/StepThree.jsx';
+import { Total } from './components/Total.jsx';
 
 export default function App() {
-
   const [loading, setLoading] = useState(true);
   const [regionId, setRegionId] = useState(null);
   const [step, setStep] = useState(1);
@@ -98,7 +98,7 @@ export default function App() {
       setStep(2);
     } else if (step === 2) {
       if (!formData.firstName || !formData.lastName || !/\S+@\S+\.\S+/.test(formData.email) || !/^\d{10}$/.test(formData.phone)) {
-        alert("Please fill all fields correctly.");
+        alert('Please fill all fields correctly.');
         return;
       }
       setStep(3);
@@ -128,22 +128,31 @@ export default function App() {
             <StepTwo
               formData={formData}
               setFormData={setFormData}
+              deliveryOptions={deliveryOptions}
+              selectedDeliveryOption={selectedDeliveryOption}
+              toggleDelivery={toggleDelivery}
             />
           )}
 
+          {step === 3 && (
+            <StepThree />
+          )}
+
         </div>
+
         <Total
           products={products}
           selectedUpgrades={selectedUpgrades}
           selectedDeliveryOption={selectedDeliveryOption}
           deliveryOptions={deliveryOptions}
           totalPrice={totalPrice}
+          step={step}
         />
       </div>
       <div className="grid">
         <div className="column-showcase"></div>
         <div className="column-total">
-          {step < 3 && <button className="next" onClick={handleNext}>Next</button>}
+          {step < 4 && <button className="next" onClick={handleNext}>Next</button>}
         </div>
       </div>
     </>

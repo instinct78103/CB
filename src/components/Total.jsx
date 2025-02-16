@@ -1,3 +1,5 @@
+import '../styles/total.css'
+
 export function Total(
   {
     products,
@@ -5,6 +7,7 @@ export function Total(
     selectedDeliveryOption,
     deliveryOptions,
     totalPrice,
+    step,
   }) {
   return (
     <div className={'column-total'}>
@@ -35,6 +38,13 @@ export function Total(
               <span>{selectedDeliveryOption.Text}</span><span>{selectedDeliveryOption.AdjustedPrice ? `$${selectedDeliveryOption.AdjustedPrice}` : 'FREE'}</span>
             </li>
           </ul>
+        )}
+
+        {step === 3 && (
+          <div className='selection discount-code'>
+            <input type="text" placeholder='Discount code'/>
+            <button>Apply</button>
+          </div>
         )}
 
         {totalPrice > 0 && (
