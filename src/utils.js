@@ -1,5 +1,5 @@
-export function initIntuit(firstname, lastname, email) {
-
+export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice) {
+  const $form = document.querySelector('#payment-form')
   const containerRef = document.querySelector('#dropin-container');
   const submitButtonRef = document.querySelector('.next');
 
@@ -33,14 +33,18 @@ export function initIntuit(firstname, lastname, email) {
       onSubmitStart: ({ paymentMethod }) => {
         console.log('Submission started for payment method:', paymentMethod);
         submitButtonRef.disabled = true;
+        setFormData(prevFormData => ({ ...prevFormData, paymentType: `TOKENIZED_${paymentMethod?.toUpperCase()}` }));
         // jQuery('#payment_type').val(`TOKENIZED_${paymentMethod?.toUpperCase()}`)
       },
       onSubmitEnd: ({ paymentMethod }) => {
         console.log('Submission ended for payment method:', paymentMethod);
         submitButtonRef.disabled = false;
       },
-      handleSubmitPayment: ({ tokenizedPaymentMethod, paymentMethodType, riskProfileToken }) => {
+      handleSubmitPayment: ({ tokenizedPaymentMethod: nonce, paymentMethodType, riskProfileToken: RiskProfileToken, }) => {
         console.log('Submitting payment... ', tokenizedPaymentMethod);
+
+        setFormData(prevFormData => ({ ...prevFormData, RiskProfileToken, nonce }));
+        $form.submit();
 
         // jQuery('#RiskProfileToken').val(riskProfileToken);
         // jQuery('#nonce').val(tokenizedPaymentMethod);
@@ -50,6 +54,32 @@ export function initIntuit(firstname, lastname, email) {
         console.log('Creating PayPal order...');
 
         submitButtonRef.disabled = false;
+
+        try {
+          const { Id, OrderId } = await (await fetch(`${apiUrl}/api/payment/qbo/create-paypal-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:
+              JSON.stringify({
+                websiteId,
+                payAmount: totalPrice,
+              }),
+          })).json();
+
+          if (!OrderId || !Id) {
+            console.warn(`Something went wrong...`);
+            return;
+          }
+
+          // jQuery('#nonce').val(Id);
+          // jQuery('#payment_type').val('PAYPAL');
+          setFormData(prevFormData => ({ ...prevFormData, nonce: Id, paymentType: 'PAYPAL' }));
+
+          return OrderId;
+
+        } catch (e) {
+          console.warn(e);
+        }
 
         // try {
         //   const {Id, OrderId} = await (await fetch(`${gtts_api_url}/api/payment/qbo/create-paypal-order`, {
@@ -78,7 +108,7 @@ export function initIntuit(firstname, lastname, email) {
       },
       handlePayPalApproveOrder: async () => {
         console.log('Approving PayPal order...');
-        // $form.submit();
+        $form.submit();
       },
     });
 
@@ -92,9 +122,3 @@ export function initIntuit(firstname, lastname, email) {
   }
 
 }
-//
-// const $form = document.querySelector('#ts-payment-option-form');
-//
-
-// const gtts_api_url = '<?php echo trim(get_option('gtts_api_url'), '/'); ?>';
-// const websiteId = <?php echo get_option('gtts_website_id'); ?>;

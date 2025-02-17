@@ -6,8 +6,10 @@ import { StepThree } from './components/StepThree.jsx';
 import { Total } from './components/Total.jsx';
 
 export default function App() {
+  const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
-  if (!websiteId) {
+
+  if (!websiteId || !apiUrl) {
     return;
   }
 
@@ -32,7 +34,7 @@ export default function App() {
 
     const fetchRegionId = async () => {
       try {
-        const json = await (await fetch('https://api.ci.gttsdev5.com/api/region/states')).json();
+        const json = await (await fetch(`${apiUrl}/api/region/states`)).json();
         const region = json.find(item => item.RegionCode === currentState).RegionID;
         setRegionId(region);
       } catch (e) {
@@ -48,7 +50,7 @@ export default function App() {
     if (!regionId) return;
     const fetchProducts = async () => {
       try {
-        const json = await (await fetch(`https://api.ci.gttsdev5.com/api/package?websiteid=${websiteId}&regionid=${regionId}`)).json();
+        const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${regionId}`)).json();
         console.log(json.Packages);
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
@@ -137,7 +139,7 @@ export default function App() {
   }
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} id="payment-form">
       <div className={'grid'}>
         <div className={'column-showcase'}>
 
@@ -167,6 +169,10 @@ export default function App() {
             <StepThree
               formData={formData}
               isPaymentScriptLoaded={isPaymentScriptLoaded}
+              setFormData={setFormData}
+              apiUrl={apiUrl}
+              websiteId={websiteId}
+              totalPrice={totalPrice}
             />
           )}
 
