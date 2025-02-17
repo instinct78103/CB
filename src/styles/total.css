@@ -1,6 +1,7 @@
 .discount-code.selection {
     display: grid;
     grid-template-columns: 1fr fit-content(100%);
+    padding-block: 15px;
 
     > input {
         padding-left: 10px;

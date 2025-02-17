@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
 import './style.css';
+import { useState, useEffect } from 'react';
 import { StepOne } from './components/StepOne.jsx';
 import { StepTwo } from './components/StepTwo.jsx';
 import { StepThree } from './components/StepThree.jsx';
 import { Total } from './components/Total.jsx';
 
 export default function App() {
+  const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
+  if (!websiteId) {
+    return;
+  }
+
   const [loading, setLoading] = useState(true);
   const [regionId, setRegionId] = useState(null);
   const [step, setStep] = useState(1);
@@ -19,6 +24,7 @@ export default function App() {
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
 
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
+  const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
 
   useEffect(() => {
     const currentState = new URL(window.location).searchParams.get('st');
@@ -31,8 +37,6 @@ export default function App() {
         setRegionId(region);
       } catch (e) {
         console.warn('Error');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -44,7 +48,7 @@ export default function App() {
     if (!regionId) return;
     const fetchProducts = async () => {
       try {
-        const json = await (await fetch(`https://api.ci.gttsdev5.com/api/package?websiteid=101&regionid=${regionId}`)).json();
+        const json = await (await fetch(`https://api.ci.gttsdev5.com/api/package?websiteid=${websiteId}&regionid=${regionId}`)).json();
         console.log(json.Packages);
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
@@ -53,7 +57,7 @@ export default function App() {
         const parser = new DOMParser();
         const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
         setDesc(doc.body.textContent.trim() || '');
-
+        setLoading(false);
       } catch (e) {
         console.warn('Error: ' + e);
       } finally {
@@ -78,7 +82,6 @@ export default function App() {
   };
 
   useEffect(() => {
-
     const availableDeliveryOptions = selectedUpgrades
       .filter(s => s.ShipOptions)
       .map(e => e.ShipOptions)
@@ -105,10 +108,36 @@ export default function App() {
     }
   };
 
-  if (loading) return (<p>Loading...</p>);
+  useEffect(() => {
+    if (step === 3) {
+      const paymentScript = document.createElement('script');
+      paymentScript.src = 'https://sdk.embedded-payments.a.intuit.com/embedded-payment-ui-sdk.en.js';
+      document.head.appendChild(paymentScript);
+      paymentScript.onload = () => setIsPaymentScriptLoaded(true);
+
+      return () => document.head.removeChild(paymentScript);
+    }
+  }, [step]);
+
+  if (loading) {
+    return (
+      <p style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50" aria-label="Loading...">
+          <circle cx="25" cy="25" r="20" fill="none" stroke="#014785" strokeWidth="4" strokeDasharray="31.4 31.4" strokeLinecap="round" transform="rotate(-90, 25, 25)">
+            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+      </p>
+    );
+  }
+
+  function onSubmit(e) {
+    e.preventDefault();
+    handleNext();
+  }
 
   return (
-    <>
+    <form onSubmit={onSubmit}>
       <div className={'grid'}>
         <div className={'column-showcase'}>
 
@@ -137,6 +166,7 @@ export default function App() {
           {step === 3 && (
             <StepThree
               formData={formData}
+              isPaymentScriptLoaded={isPaymentScriptLoaded}
             />
           )}
 
@@ -154,9 +184,9 @@ export default function App() {
       <div className="grid">
         <div className="column-showcase"></div>
         <div className="column-total">
-          {step < 4 && <button className="next" onClick={handleNext}>Next</button>}
+          {step < 4 && <button className="next">Next</button>}
         </div>
       </div>
-    </>
+    </form>
   );
 }

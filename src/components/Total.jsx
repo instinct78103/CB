@@ -1,4 +1,4 @@
-import '../styles/total.css'
+import '../styles/total.css';
 
 export function Total(
   {
@@ -41,8 +41,8 @@ export function Total(
         )}
 
         {step === 3 && (
-          <div className='selection discount-code'>
-            <input type="text" placeholder='Discount code'/>
+          <div className="selection discount-code">
+            <input type="text" name="discount_code" placeholder="Discount code" />
             <button>Apply</button>
           </div>
         )}

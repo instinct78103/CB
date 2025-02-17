@@ -1,20 +1,19 @@
-import '../styles/stepThree.css';
 import { useEffect } from 'react';
 
-export function StepThree({ formData }) {
+export function StepThree({ formData, isPaymentScriptLoaded }) {
 
   useEffect(() => {
-    const paymentScript = document.createElement('script');
-    paymentScript.src = 'https://sdk.embedded-payments.a.intuit.com/embedded-payment-ui-sdk.en.js';
-    paymentScript.async = true;
-    document.head.appendChild(paymentScript);
-    paymentScript.onload = async () => {
-      const { initIntuit } = await import('../helpers.js');
-      initIntuit(formData.firstName, formData.lastName, formData.email);
-    };
+    if (isPaymentScriptLoaded) {
+      async function runPaymentScript() {
+        if (isPaymentScriptLoaded) {
+          const { initIntuit } = await import('../helpers.js');
+          initIntuit(formData.firstName, formData.lastName, formData.email);
+        }
+      }
 
-    return () => document.head.removeChild(paymentScript);
-  }, []);
+      runPaymentScript();
+    }
+  }, [isPaymentScriptLoaded]);
 
   return (
     <div>
