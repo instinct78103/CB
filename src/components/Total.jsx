@@ -10,8 +10,8 @@ export function Total(
     step,
   }) {
   return (
-    <div className="column-total grid-area--selected" style={{ overflow: step === 3 ? 'hidden' : '' }}>
-      <div className="wrap" style={{ overflow: step === 3 ? 'hidden' : '' }}>
+    <div className="column-total grid-area--selected">
+      <div className="wrap">
         <div className="title">YOUR SELECTION</div>
         <div className="total-wrap">
 
@@ -67,7 +67,7 @@ export function Total(
           {step === 3 && (
             <div className="selection discount-code">
               <input type="text" name="discount_code" placeholder="Discount code" />
-              <button>Apply</button>
+              <button className="apply-coupon" type="button">Apply</button>
             </div>
           )}
 

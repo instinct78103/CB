@@ -30,6 +30,7 @@ export default function App() {
 
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
+  const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
 
   useEffect(() => {
     const currentState = new URL(window.location).searchParams.get('st');
@@ -202,6 +203,8 @@ export default function App() {
             websiteId={websiteId}
             totalPrice={totalPrice}
             handleNext={handleNext}
+            isPayLaterChecked={isPayLaterChecked}
+            setIsPayLaterChecked={setIsPayLaterChecked}
           />
         )}
 
@@ -214,7 +217,11 @@ export default function App() {
           step={step}
         />
       </div>
-      <div>{step < 4 && <button className="next">Next</button>}</div>
+      <div>
+        {step < 3 && <button className="next">Next</button>}
+        {step === 3 && <button className="next">COMPLETE PAYMENT</button>}
+        {isPayLaterChecked && <button className="paylater_next">Complete Registration</button>}
+      </div>
     </form>
   );
 }

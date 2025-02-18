@@ -111,6 +111,34 @@ label:has(> #pay-later) {
             display: block;
         }
     }
+
+    &:has(#pay-later:checked) {
+        .later-description {
+            display: block !important;
+        }
+    }
+
+    &:has(#pay-later:checked) {
+        #complete-payment, #dropin-container, [id*="zoid"], button:not(.is_pay_later):not(.apply-coupon):not(.paylater_next), iframe {
+            display: none !important;
+        }
+    }
+
+    &:has(#pay-later:not(:checked)) {
+        .is_pay_later, .later-description {
+            display: none !important;
+        }
+    }
+
+    .later-description {
+        p {
+            margin-block: 10px;
+        }
+    }
+
+    div:has(> div[slot]) {
+        display: none !important;
+    }
 }
 
 .wrap {
