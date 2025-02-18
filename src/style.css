@@ -50,7 +50,7 @@ div:has(> :is(.next, .paylater_next)) {
 }
 
 .next, .paylater_next {
-    background: #f1685c;
+    background: #c9302c;
     border: none;
     padding: 10px;
     color: #fff;
