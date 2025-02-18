@@ -1,5 +1,4 @@
-export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice) {
-  const $form = document.querySelector('#payment-form')
+export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice, handleNext) {
   const containerRef = document.querySelector('#dropin-container');
   const submitButtonRef = document.querySelector('.next');
 
@@ -34,21 +33,16 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
         console.log('Submission started for payment method:', paymentMethod);
         submitButtonRef.disabled = true;
         setFormData(prevFormData => ({ ...prevFormData, paymentType: `TOKENIZED_${paymentMethod?.toUpperCase()}` }));
-        // jQuery('#payment_type').val(`TOKENIZED_${paymentMethod?.toUpperCase()}`)
       },
       onSubmitEnd: ({ paymentMethod }) => {
         console.log('Submission ended for payment method:', paymentMethod);
         submitButtonRef.disabled = false;
       },
       handleSubmitPayment: ({ tokenizedPaymentMethod: nonce, paymentMethodType, riskProfileToken: RiskProfileToken, }) => {
-        console.log('Submitting payment... ', tokenizedPaymentMethod);
+        console.log('Submitting payment... ', nonce);
 
         setFormData(prevFormData => ({ ...prevFormData, RiskProfileToken, nonce }));
-        $form.submit();
-
-        // jQuery('#RiskProfileToken').val(riskProfileToken);
-        // jQuery('#nonce').val(tokenizedPaymentMethod);
-        // $form.submit();
+        handleNext()
       },
       handlePayPalCreateOrder: async () => {
         console.log('Creating PayPal order...');
@@ -71,8 +65,6 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
             return;
           }
 
-          // jQuery('#nonce').val(Id);
-          // jQuery('#payment_type').val('PAYPAL');
           setFormData(prevFormData => ({ ...prevFormData, nonce: Id, paymentType: 'PAYPAL' }));
 
           return OrderId;
@@ -80,39 +72,13 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
         } catch (e) {
           console.warn(e);
         }
-
-        // try {
-        //   const {Id, OrderId} = await (await fetch(`${gtts_api_url}/api/payment/qbo/create-paypal-order`, {
-        //     method: 'POST',
-        //     headers: { "Content-Type": "application/json" },
-        //     body:
-        //       JSON.stringify({
-        //         websiteId,
-        //         payAmount: <?php echo $vars['subTotal']; ?>,
-        // })
-        // })).json();
-        //
-        //   if (!OrderId || !Id) {
-        //     console.warn(`Something went wrong...`);
-        //     return false;
-        //   }
-        //
-        //   jQuery('#nonce').val(Id);
-        //   jQuery('#payment_type').val('PAYPAL');
-        //
-        //   return OrderId;
-        //
-        // } catch (e) {
-        //   console.warn(e)
-        // }
       },
       handlePayPalApproveOrder: async () => {
         console.log('Approving PayPal order...');
-        $form.submit();
+        handleNext();
       },
     });
 
-    // isPaymentFormLoaded = true;
     submitButtonRef.style.display = 'inline-block'; // Show the proceed button
   } catch (e) {
     submitButtonRef.disabled = false;
@@ -120,5 +86,4 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
   } finally {
     submitButtonRef.disabled = false;
   }
-
 }

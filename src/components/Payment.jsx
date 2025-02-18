@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
-export function StepThree({ formData: {firstName, lastName, email}, isPaymentScriptLoaded, setFormData, apiUrl, websiteId, totalPrice }) {
+export function Payment({ formData: {firstName, lastName, email}, isPaymentScriptLoaded, setFormData, apiUrl, websiteId, totalPrice, handleNext }) {
 
   useEffect(() => {
     if (isPaymentScriptLoaded) {
       async function runPaymentScript() {
         if (isPaymentScriptLoaded) {
-          const { initIntuit } = await import('../utils.js');
-          initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice);
+          const { initIntuit } = await import('../utils/intuitPayment.js');
+          initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice, handleNext);
         }
       }
 

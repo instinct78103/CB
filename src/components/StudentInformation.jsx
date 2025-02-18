@@ -1,6 +1,13 @@
 import '../styles/stepTwo.css';
 
-export function StepTwo({ formData, setFormData, deliveryOptions, selectedDeliveryOption, toggleDelivery }) {
+export function StudentInformation(
+  {
+    formData,
+    setFormData,
+    mainCourseDeliveryOptions,
+    selectedMainCourseDelivery,
+    setSelectedMainCourseDelivery,
+  }) {
   return (
     <>
       <div>
@@ -34,16 +41,25 @@ export function StepTwo({ formData, setFormData, deliveryOptions, selectedDelive
           />
         </div>
       </div>
-      <div>
-        <h3>CERTIFICATE DELIVERY</h3>
-        <select
-          onChange={(e) => toggleDelivery(deliveryOptions.find(o => o.ShipMethodPriceID === +e.target.value))}
-          defaultValue={selectedDeliveryOption.ShipMethodPriceID}
-        >
-          {deliveryOptions.map(o => <option key={o.ShipMethodPriceID} value={o.ShipMethodPriceID}>{o.Text}</option>)}
-        </select>
-        <p>{selectedDeliveryOption.Description}</p>
-      </div>
+
+      {mainCourseDeliveryOptions.length > 0 && (
+        <div>
+          <h3>CERTIFICATE DELIVERY</h3>
+          <select
+            onChange={(e) => setSelectedMainCourseDelivery(
+              mainCourseDeliveryOptions.find(o => o.ShipMethodPriceID === +e.target.value),
+            )}
+            value={selectedMainCourseDelivery?.ShipMethodPriceID || ''}
+          >
+            {mainCourseDeliveryOptions.map(o => (
+              <option key={o.ShipMethodPriceID} value={o.ShipMethodPriceID}>
+                {o.Text} {o.AdjustedPrice ? `$${o.AdjustedPrice}` : 'FREE'}
+              </option>
+            ))}
+          </select>
+          <p>{selectedMainCourseDelivery?.Description}</p>
+        </div>
+      )}
     </>
   );
 }

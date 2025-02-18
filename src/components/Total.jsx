@@ -4,38 +4,61 @@ export function Total(
   {
     products,
     selectedUpgrades,
-    selectedDeliveryOption,
-    deliveryOptions,
+    selectedDeliveryOptions,
+    selectedMainCourseDelivery,
     totalPrice,
     step,
   }) {
   return (
-    <div className={'column-total'}>
+    <div className="column-total">
       <h3>YOUR SELECTION</h3>
       <div className="total-wrap">
 
         {products?.length > 0 && (
-          <ul className={'selection'}>
-            <li className={'list-heading'}>Course</li>
-            {products.map((item) => <li key={item.ProductID}><span>{item.Name}</span><span>${item.Price}</span>
-            </li>)}
-          </ul>
-        )}
-
-        {selectedUpgrades?.length > 0 && (
-          <ul className={'selection'}>
-            <li className={'list-heading'}>Upgrades:</li>
-            {selectedUpgrades.map((item) => (
-              <li key={item.Name}><span>{item.Name}</span><span>${item.PriceCart}</span></li>
+          <ul className="selection">
+            <li className="list-heading">Course</li>
+            {products.map((item) => (
+              <li key={item.ProductID}>
+                <span>{item.Name}</span>
+                <span>${item.Price}</span>
+              </li>
             ))}
           </ul>
         )}
 
-        {selectedDeliveryOption && deliveryOptions?.length > 0 && (
+        {selectedUpgrades?.length > 0 && (
+          <ul className="selection">
+            <li className="list-heading">Upgrades:</li>
+            {selectedUpgrades.map((upgrade) => (
+              <li key={upgrade.ProductID}>
+                <span>{upgrade.Name}</span>
+                <span>${upgrade.PriceCart}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {selectedUpgrades
+          .filter((upgrade) => selectedDeliveryOptions[upgrade.ProductID]) // Only show if it has delivery
+          .map((upgrade) => {
+            const delivery = selectedDeliveryOptions[upgrade.ProductID];
+            return (
+              <ul className="selection" key={`delivery-${upgrade.ProductID}`}>
+                <li className="list-heading">Delivery of {upgrade.Name}:</li>
+                <li>
+                  <span>{delivery.Text}</span>
+                  <span>{delivery.AdjustedPrice ? `$${delivery.AdjustedPrice}` : 'FREE'}</span>
+                </li>
+              </ul>
+            );
+          })}
+
+        {selectedMainCourseDelivery && (
           <ul className={'selection'}>
-            <li className="list-heading">Certification Delivery:</li>
+            <li className="list-heading">Shipping Options:</li>
             <li>
-              <span>{selectedDeliveryOption.Text}</span><span>{selectedDeliveryOption.AdjustedPrice ? `$${selectedDeliveryOption.AdjustedPrice}` : 'FREE'}</span>
+              <span>{selectedMainCourseDelivery.Text}</span>
+              <span>{selectedMainCourseDelivery.AdjustedPrice ? `$${selectedMainCourseDelivery.AdjustedPrice}` : 'FREE'}</span>
             </li>
           </ul>
         )}
@@ -48,8 +71,9 @@ export function Total(
         )}
 
         {totalPrice > 0 && (
-          <p className={'selection total'}>
-            <span>TOTAL</span><span>${totalPrice.toFixed(2)}</span>
+          <p className="selection total">
+            <span>TOTAL</span>
+            <span>${totalPrice.toFixed(2)}</span>
           </p>
         )}
 

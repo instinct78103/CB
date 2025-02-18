@@ -1,8 +1,8 @@
 import './style.css';
 import { useState, useEffect } from 'react';
-import { StepOne } from './components/StepOne.jsx';
-import { StepTwo } from './components/StepTwo.jsx';
-import { StepThree } from './components/StepThree.jsx';
+import { CourseSelection } from './components/CourseSelection.jsx';
+import { StudentInformation } from './components/StudentInformation.jsx';
+import { Payment } from './components/Payment.jsx';
 import { Total } from './components/Total.jsx';
 
 export default function App() {
@@ -17,13 +17,16 @@ export default function App() {
   const [regionId, setRegionId] = useState(null);
   const [step, setStep] = useState(1);
   const [products, setProducts] = useState([]);
+
+  const [mainCoursePrice, setMainCoursePrice] = useState(0);
+  const [mainCourseDeliveryOptions, setMainCourseDeliveryOptions] = useState([])
+  const [selectedMainCourseDelivery, setSelectedMainCourseDelivery] = useState(null);
   const [desc, setDesc] = useState('');
-  const [minSum, setMinSum] = useState(0);
 
   const [upgrades, setUpgrades] = useState([]);
   const [selectedUpgrades, setSelectedUpgrades] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
-  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
+  const [selectedDeliveryOptions, setSelectedDeliveryOptions] = useState([]);
 
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
@@ -54,7 +57,8 @@ export default function App() {
         console.log(json.Packages);
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
-        setMinSum(json.Packages[0].Price);
+        setMainCoursePrice(json.Packages[0].Price);
+        setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions)
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
@@ -71,32 +75,54 @@ export default function App() {
 
   }, [regionId]);
 
-  const toggleUpgrades = (item) => {
-    setSelectedUpgrades((prev) =>
-      prev.some((i) => i.ProductID === item.ProductID)
-        ? prev.filter((i) => i.ProductID !== item.ProductID)
-        : [...prev, item],
-    );
-  };
-
-  const toggleDelivery = item => {
-    setSelectedDeliveryOption(deliveryOptions?.length ? item : null);
-  };
-
   useEffect(() => {
-    const availableDeliveryOptions = selectedUpgrades
-      .filter(s => s.ShipOptions)
-      .map(e => e.ShipOptions)
-      .flat(1);
-
-    setDeliveryOptions(availableDeliveryOptions);
-
-    if (!availableDeliveryOptions?.length) {
-      setSelectedDeliveryOption(null);
+    if (mainCourseDeliveryOptions?.length) {
+      const cheapestOption = mainCourseDeliveryOptions.reduce((min, option) =>
+        option.AdjustedPrice < min.AdjustedPrice ? option : min
+      );
+      setSelectedMainCourseDelivery(cheapestOption);
     }
-  }, [selectedUpgrades]);
+  }, [mainCourseDeliveryOptions]);
 
-  const totalPrice = selectedUpgrades.reduce((sum, item) => sum + item.PriceCart, minSum) + (selectedDeliveryOption?.AdjustedPrice || 0);
+  const toggleUpgrades = (item) => {
+
+    setSelectedUpgrades((prev) => {
+      const alreadySelected = prev.some((i) => i.ProductID === item.ProductID);
+
+      let updatedSelection;
+      let updatedDeliveryOptions = { ...deliveryOptions };
+      let updatedSelectedDeliveryOptions = { ...selectedDeliveryOptions };
+
+      if (alreadySelected) {
+        // Remove upgrade
+        updatedSelection = prev.filter((i) => i.ProductID !== item.ProductID);
+        delete updatedDeliveryOptions[item.ProductID];
+        delete updatedSelectedDeliveryOptions[item.ProductID];
+      } else {
+        // Add upgrade
+        updatedSelection = [...prev, item];
+
+        if (item.ShipOptions?.length > 0) {
+          // Store delivery options for this upgrade
+          updatedDeliveryOptions[item.ProductID] = item.ShipOptions;
+
+          // Auto-select the cheapest option
+          updatedSelectedDeliveryOptions[item.ProductID] = item.ShipOptions.reduce((min, option) =>
+            option.Price < min.Price ? option : min,
+          );
+        }
+      }
+
+      setDeliveryOptions(updatedDeliveryOptions);
+      setSelectedDeliveryOptions(updatedSelectedDeliveryOptions);
+
+      return updatedSelection;
+    });
+
+  };
+
+  const totalPrice = mainCoursePrice +
+    selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0);
 
   const handleNext = () => {
     if (step === 1) {
@@ -107,6 +133,8 @@ export default function App() {
         return;
       }
       setStep(3);
+    } else {
+      console.log({ step });
     }
   };
 
@@ -144,35 +172,37 @@ export default function App() {
         <div className={'column-showcase'}>
 
           {step === 1 && (
-            <StepOne
+            <CourseSelection
               products={products}
               upgrades={upgrades}
               desc={desc}
               selectedUpgrades={selectedUpgrades}
               deliveryOptions={deliveryOptions}
               toggleUpgrades={toggleUpgrades}
-              toggleDelivery={toggleDelivery}
+              selectedDeliveryOptions={selectedDeliveryOptions}
+              setSelectedDeliveryOptions={setSelectedDeliveryOptions}
             />
           )}
 
           {step === 2 && (
-            <StepTwo
+            <StudentInformation
               formData={formData}
               setFormData={setFormData}
-              deliveryOptions={deliveryOptions}
-              selectedDeliveryOption={selectedDeliveryOption}
-              toggleDelivery={toggleDelivery}
+              mainCourseDeliveryOptions={mainCourseDeliveryOptions}
+              selectedMainCourseDelivery={selectedMainCourseDelivery}
+              setSelectedMainCourseDelivery={setSelectedMainCourseDelivery}
             />
           )}
 
           {step === 3 && (
-            <StepThree
+            <Payment
               formData={formData}
               isPaymentScriptLoaded={isPaymentScriptLoaded}
               setFormData={setFormData}
               apiUrl={apiUrl}
               websiteId={websiteId}
               totalPrice={totalPrice}
+              handleNext={handleNext}
             />
           )}
 
@@ -181,8 +211,8 @@ export default function App() {
         <Total
           products={products}
           selectedUpgrades={selectedUpgrades}
-          selectedDeliveryOption={selectedDeliveryOption}
-          deliveryOptions={deliveryOptions}
+          selectedDeliveryOptions={selectedDeliveryOptions}
+          selectedMainCourseDelivery={selectedMainCourseDelivery}
           totalPrice={totalPrice}
           step={step}
         />
