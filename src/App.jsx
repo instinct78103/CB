@@ -122,7 +122,8 @@ export default function App() {
   };
 
   const totalPrice = mainCoursePrice +
-    selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0);
+    selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0) +
+    (selectedMainCourseDelivery?.AdjustedPrice || 0);
 
   const handleNext = () => {
     if (step === 1) {
