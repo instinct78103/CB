@@ -17,7 +17,7 @@ li {
     list-style: none;
 }
 
-h3 {
+.title {
     text-align: center;
     padding: 10px;
     background: #014785;
@@ -29,32 +29,45 @@ h3 {
     text-wrap: balance;
 }
 
+div:has(> .next) {
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #e3e3e3;
+    padding-block: 20px;
+    width: min(1120px, calc(100% - 40px));
+    margin-inline: auto;
+}
+
 .next {
     background: #f1685c;
     border: none;
     padding: 10px;
     color: #fff;
-    width: 100%;
     border-radius: 6px;
     font-size: 24px;
     text-transform: uppercase;
     font-weight: 600;
     cursor: pointer;
+    width: fit-content;
+    min-width: 300px;
+    margin-left: auto;
 }
 
 .grid + .grid {
-    border-top: 1px solid #e3e3e3;
+
 }
 
 .products-list {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
+
 }
 
-div:has(>h3) {
+div:has(>.title) {
     display: grid;
     align-self: flex-start;
+    gap: var(--gap);
 }
 
 .grid {
@@ -64,6 +77,107 @@ div:has(>h3) {
     padding-block: 20px;
     width: min(1120px, calc(100% - 40px));
     margin-inline: auto;
+
+    .grid-area--product-list {
+        grid-area: product-list;
+    }
+
+    .main-course {
+        grid-area: main-course;
+    }
+
+    .upgrades {
+        grid-area: upgrades;
+    }
+
+    .grid-area--selected {
+        grid-area: selected;
+        background: #fff;
+        display: grid;
+        grid-template-rows: var(--content-size, 0fr);
+        transition: 0.3s;
+        align-items: flex-start;
+    }
+
+    .grid-area--student-info {
+        grid-area: student-info;
+    }
+
+    .grid-area--delivery {
+        grid-area: delivery;
+    }
+
+    .payment {
+        grid-area: payment;
+    }
+
+    .grid-area--title {
+        grid-area: title;
+    }
+
+    .grid-area--heading {
+        grid-area: heading;
+    }
+
+    .grid-area--pay_later {
+        grid-area: pay_later;
+    }
+
+    .grid-area--gateway {
+        grid-area: gateway;
+    }
+
+    .grid-area--details {
+        grid-area: details;
+
+        @media (width > 1000px) {
+            display: none;
+        }
+    }
+
+    &:has(>.products-list) {
+        grid-template-areas:
+            'title selected'
+            'main-course selected'
+            'upgrades selected'
+            '. selected';
+    }
+
+    &:has(> .student-info) {
+        grid-template-areas:
+            'student-info selected'
+            'delivery selected'
+            '. selected';
+    }
+
+    &:has(> .payment) {
+        grid-template-areas:
+            'payment selected'
+    }
+
+    &:has(> .grid-area--gateway) {
+        grid-template-columns: 1fr fit-content(100%) 300px;
+        grid-template-areas:
+            'title title selected'
+            'heading pay_later selected'
+            'gateway gateway selected'
+            'error_text error_text selected';
+        gap: 10px 20px;
+
+        @media (width < 1000px) {
+            & {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    'title'
+                    'heading'
+                    'details'
+                    'selected'
+                    'gateway'
+                    'pay_later'
+                    'error_text';
+            }
+        }
+    }
 }
 
 .column-showcase {
@@ -80,6 +194,11 @@ div:has(>h3) {
 .column-total {
     position: sticky;
     top: 20px;
+
+    > .wrap {
+        position: sticky;
+        top: 20px;
+    }
 
     .total-wrap {
         border: 1px solid #e3e3e3;

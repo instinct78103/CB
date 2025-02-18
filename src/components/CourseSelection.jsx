@@ -13,9 +13,9 @@ export function CourseSelection(
   return (
     <>
       {products?.length > 0 && (
-        <div>
-          <h3>Courses Selection</h3>
-          <ul className={'products-list'}>
+        <>
+          <div className="title grid-area--title">Courses Selection</div>
+          <ul className={'products-list grid-area--main-course'}>
             <li className={'item'}>
               {products.map((product) => (
                 <label key={product.ProductID}>
@@ -29,12 +29,12 @@ export function CourseSelection(
               <p className={'product-desc'}>{desc}</p>
             </li>
           </ul>
-        </div>
+        </>
       )}
 
       {upgrades?.length > 0 && (
-        <div>
-          <h3>Upgrades Selection</h3>
+        <div className="upgrades">
+          <div className="title">Upgrades Selection</div>
           <ul className={'products-list'}>
             {upgrades.map(item => (
               <li key={item.ProductID} className={'item'}>
@@ -60,8 +60,8 @@ export function CourseSelection(
       {selectedUpgrades
         .filter((upgrade) => deliveryOptions[upgrade.ProductID])
         .map((upgrade) => (
-          <div key={`delivery-${upgrade.ProductID}`}>
-            <h3>Certificate delivery for {upgrade.Name}</h3>
+          <div key={`delivery-${upgrade.ProductID}`} className="delivery">
+            <div className="title">Certificate delivery for {upgrade.Name}</div>
             {deliveryOptions[upgrade.ProductID].map((option) => (
               <li key={option.ShipMethodPriceID} className="item">
                 <label>

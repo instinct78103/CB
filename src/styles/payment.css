@@ -1,0 +1,118 @@
+:is(label:has(#pay-later), .total-text) {
+    &:before {
+        content: unset;
+    }
+}
+
+label:has(> #pay-later) {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-block: 10px;
+    font-weight: 600;
+
+    span {
+        color: #043156;
+        font-size: 14px;
+        text-wrap: balance;
+        line-height: 1.5;
+    }
+
+    @media (width < 1000px) {
+        justify-content: center;
+        border: 1px solid #E1E1E1;
+        border-radius: 3px;
+        padding: 10px;
+    }
+}
+
+.total-text {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    color: #043156;
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0 10px;
+}
+
+#pay-later {
+    margin-top: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.payment-option-heading {
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-option--title {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: #043156;
+    text-wrap: balance;
+}
+
+.payment-option--subtitle {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    margin: 0;
+    color: #043156;
+    text-wrap: balance;
+}
+
+.or {
+    display: grid;
+    grid-template-areas: 'line--left or line--right';
+    grid-auto-rows: fit-content(100%);
+    grid-template-columns: auto min-content auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+
+    @media (width > 1000px) {
+        display: none;
+    }
+
+    .line {
+        height: 1px;
+        background: #E1E1E1;
+    }
+}
+
+#payment-form{
+    .expand {
+        display: none;
+    }
+
+    &:has(.expand:checked) {
+        --content-size: 1fr;
+
+        .is-open {
+            display: block;
+        }
+
+        .is-closed {
+            display: none;
+        }
+    }
+
+    &:has(.expand:not(:checked)) {
+        .is-open {
+            display: none;
+        }
+
+        .is-closed {
+            display: block;
+        }
+    }
+}
+
+.wrap {
+    --gap: 0;
+}

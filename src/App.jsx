@@ -19,7 +19,7 @@ export default function App() {
   const [products, setProducts] = useState([]);
 
   const [mainCoursePrice, setMainCoursePrice] = useState(0);
-  const [mainCourseDeliveryOptions, setMainCourseDeliveryOptions] = useState([])
+  const [mainCourseDeliveryOptions, setMainCourseDeliveryOptions] = useState([]);
   const [selectedMainCourseDelivery, setSelectedMainCourseDelivery] = useState(null);
   const [desc, setDesc] = useState('');
 
@@ -58,7 +58,7 @@ export default function App() {
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
-        setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions)
+        setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
@@ -78,7 +78,7 @@ export default function App() {
   useEffect(() => {
     if (mainCourseDeliveryOptions?.length) {
       const cheapestOption = mainCourseDeliveryOptions.reduce((min, option) =>
-        option.AdjustedPrice < min.AdjustedPrice ? option : min
+        option.AdjustedPrice < min.AdjustedPrice ? option : min,
       );
       setSelectedMainCourseDelivery(cheapestOption);
     }
@@ -169,45 +169,41 @@ export default function App() {
 
   return (
     <form onSubmit={onSubmit} id="payment-form">
-      <div className={'grid'}>
-        <div className={'column-showcase'}>
+      <div className={`grid`}>
+        {step === 1 && (
+          <CourseSelection
+            products={products}
+            upgrades={upgrades}
+            desc={desc}
+            selectedUpgrades={selectedUpgrades}
+            deliveryOptions={deliveryOptions}
+            toggleUpgrades={toggleUpgrades}
+            selectedDeliveryOptions={selectedDeliveryOptions}
+            setSelectedDeliveryOptions={setSelectedDeliveryOptions}
+          />
+        )}
 
-          {step === 1 && (
-            <CourseSelection
-              products={products}
-              upgrades={upgrades}
-              desc={desc}
-              selectedUpgrades={selectedUpgrades}
-              deliveryOptions={deliveryOptions}
-              toggleUpgrades={toggleUpgrades}
-              selectedDeliveryOptions={selectedDeliveryOptions}
-              setSelectedDeliveryOptions={setSelectedDeliveryOptions}
-            />
-          )}
+        {step === 2 && (
+          <StudentInformation
+            formData={formData}
+            setFormData={setFormData}
+            mainCourseDeliveryOptions={mainCourseDeliveryOptions}
+            selectedMainCourseDelivery={selectedMainCourseDelivery}
+            setSelectedMainCourseDelivery={setSelectedMainCourseDelivery}
+          />
+        )}
 
-          {step === 2 && (
-            <StudentInformation
-              formData={formData}
-              setFormData={setFormData}
-              mainCourseDeliveryOptions={mainCourseDeliveryOptions}
-              selectedMainCourseDelivery={selectedMainCourseDelivery}
-              setSelectedMainCourseDelivery={setSelectedMainCourseDelivery}
-            />
-          )}
-
-          {step === 3 && (
-            <Payment
-              formData={formData}
-              isPaymentScriptLoaded={isPaymentScriptLoaded}
-              setFormData={setFormData}
-              apiUrl={apiUrl}
-              websiteId={websiteId}
-              totalPrice={totalPrice}
-              handleNext={handleNext}
-            />
-          )}
-
-        </div>
+        {step === 3 && (
+          <Payment
+            formData={formData}
+            isPaymentScriptLoaded={isPaymentScriptLoaded}
+            setFormData={setFormData}
+            apiUrl={apiUrl}
+            websiteId={websiteId}
+            totalPrice={totalPrice}
+            handleNext={handleNext}
+          />
+        )}
 
         <Total
           products={products}
@@ -218,12 +214,7 @@ export default function App() {
           step={step}
         />
       </div>
-      <div className="grid">
-        <div className="column-showcase"></div>
-        <div className="column-total">
-          {step < 4 && <button className="next">Next</button>}
-        </div>
-      </div>
+      <div>{step < 4 && <button className="next">Next</button>}</div>
     </form>
   );
 }

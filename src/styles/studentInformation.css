@@ -1,3 +1,14 @@
+.student-info {
+    .wrap {
+        --gap: 20px;
+    }
+}
+
+.wrap {
+    display: grid;
+    gap: var(--gap);
+}
+
 .column-showcase {
     > div {
         --gap: 15px;
