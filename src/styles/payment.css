@@ -144,3 +144,15 @@ label:has(> #pay-later) {
 .wrap {
     --gap: 0;
 }
+
+.apply-coupon {
+    min-width: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        max-height: 16px;
+        width: fit-content;
+    }
+}

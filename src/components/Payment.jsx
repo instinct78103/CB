@@ -11,7 +11,7 @@ export function Payment(
     totalPrice,
     handleNext,
     isPayLaterChecked,
-    setIsPayLaterChecked
+    setIsPayLaterChecked,
   }) {
 
   useEffect(() => {

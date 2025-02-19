@@ -1,4 +1,5 @@
 import '../styles/total.css';
+import { useState } from 'react';
 
 export function Total(
   {
@@ -8,7 +9,41 @@ export function Total(
     selectedMainCourseDelivery,
     totalPrice,
     step,
+    mainCourseId,
+    regionId,
+    apiUrl,
+    discount,
+    setDiscount,
   }) {
+
+  const [coupon, setCoupon] = useState('');
+  const [isCouponLoading, setIsCouponLoading] = useState(false)
+
+  async function fetchDiscount(coupon) {
+
+    if (!coupon) {
+      return;
+    }
+
+    const url = new URL(`${apiUrl}/api/customer/verifyOfferCode`);
+    url.searchParams.set('OfferCode', coupon);
+    url.searchParams.set('ProductID', mainCourseId);
+    url.searchParams.set('RegionID', regionId);
+
+    setIsCouponLoading(true)
+
+    try {
+      const json = await (await fetch(url.toString())).json();
+      console.log(json?.Discount)
+      setDiscount(json?.Discount || 0);
+    } catch (e) {
+      console.warn('Error: failed to fetch discount');
+      setIsCouponLoading(false)
+    } finally {
+      setIsCouponLoading(false)
+    }
+  }
+
   return (
     <div className="column-total grid-area--selected">
       <div className="wrap">
@@ -64,16 +99,32 @@ export function Total(
             </ul>
           )}
 
+          {discount < 0 &&
+            <div className="selection">
+              <span><strong>Discount:</strong></span>
+              <span>-${-1 * discount}</span>
+            </div>
+          }
+
           {step === 3 && (
             <div className="selection discount-code">
-              <input type="text" name="discount_code" placeholder="Discount code" />
-              <button className="apply-coupon" type="button">Apply</button>
+              <input type="text" name="discount_code" placeholder="Discount code" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
+              <button className="apply-coupon" type="button" disabled={isCouponLoading} onClick={() => fetchDiscount(coupon)}>
+                {isCouponLoading && (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50" aria-label="Loading...">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#fff" strokeWidth="4" strokeDasharray="31.4 31.4" strokeLinecap="round" transform="rotate(-90, 25, 25)">
+                      <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+                )}
+                {!isCouponLoading && 'Apply'}
+              </button>
             </div>
           )}
 
           {totalPrice > 0 && (
             <p className="selection total">
-              <span>TOTAL</span>
+              <span><strong>TOTAL</strong></span>
               <span>${totalPrice.toFixed(2)}</span>
             </p>
           )}

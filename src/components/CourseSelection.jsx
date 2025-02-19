@@ -2,7 +2,7 @@ export function CourseSelection(
   {
     products,
     upgrades,
-    desc,
+    mainCourseDesc,
     selectedUpgrades,
     selectedDeliveryOptions,
     setSelectedDeliveryOptions,
@@ -26,7 +26,7 @@ export function CourseSelection(
                   </div>
                 </label>
               ))}
-              <p className={'product-desc'}>{desc}</p>
+              <p className={'product-desc'}>{mainCourseDesc}</p>
             </li>
           </ul>
         </>

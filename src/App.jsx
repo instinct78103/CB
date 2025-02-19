@@ -19,9 +19,10 @@ export default function App() {
   const [products, setProducts] = useState([]);
 
   const [mainCoursePrice, setMainCoursePrice] = useState(0);
+  const [mainCourseId, setMainCourseId] = useState(null);
   const [mainCourseDeliveryOptions, setMainCourseDeliveryOptions] = useState([]);
   const [selectedMainCourseDelivery, setSelectedMainCourseDelivery] = useState(null);
-  const [desc, setDesc] = useState('');
+  const [mainCourseDesc, setMainCourseDesc] = useState('');
 
   const [upgrades, setUpgrades] = useState([]);
   const [selectedUpgrades, setSelectedUpgrades] = useState([]);
@@ -31,6 +32,7 @@ export default function App() {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
   const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
+  const [discount, setDiscount] = useState(0);
 
   useEffect(() => {
     const currentState = new URL(window.location).searchParams.get('st');
@@ -59,11 +61,12 @@ export default function App() {
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
+        setMainCourseId(json.Packages[0].ProductID)
         setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
-        setDesc(doc.body.textContent.trim() || '');
+        setMainCourseDesc(doc.body.textContent.trim() || '');
         setLoading(false);
       } catch (e) {
         console.warn('Error: ' + e);
@@ -124,7 +127,7 @@ export default function App() {
 
   const totalPrice = mainCoursePrice +
     selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0) +
-    (selectedMainCourseDelivery?.AdjustedPrice || 0);
+    (selectedMainCourseDelivery?.AdjustedPrice || 0) + (discount || 0)
 
   const handleNext = () => {
     if (step === 1) {
@@ -175,7 +178,7 @@ export default function App() {
           <CourseSelection
             products={products}
             upgrades={upgrades}
-            desc={desc}
+            mainCourseDesc={mainCourseDesc}
             selectedUpgrades={selectedUpgrades}
             deliveryOptions={deliveryOptions}
             toggleUpgrades={toggleUpgrades}
@@ -215,11 +218,16 @@ export default function App() {
           selectedMainCourseDelivery={selectedMainCourseDelivery}
           totalPrice={totalPrice}
           step={step}
+          mainCourseId={mainCourseId}
+          regionId={regionId}
+          apiUrl={apiUrl}
+          discount={discount}
+          setDiscount={setDiscount}
         />
       </div>
       <div>
         {step < 3 && <button className="next">Next</button>}
-        {step === 3 && <button className="next">COMPLETE PAYMENT</button>}
+        {step === 3 && <button className="next">Complete Payment</button>}
         {isPayLaterChecked && <button className="paylater_next">Complete Registration</button>}
       </div>
     </form>
