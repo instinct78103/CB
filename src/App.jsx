@@ -8,8 +8,9 @@ import { Total } from './components/Total.jsx';
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
+  const paymentGateway = document.querySelector('#root')?.getAttribute('data-paymentGateway');
 
-  if (!websiteId || !apiUrl) {
+  if (!websiteId || !apiUrl || !paymentGateway) {
     return;
   }
 
@@ -61,7 +62,7 @@ export default function App() {
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
-        setMainCourseId(json.Packages[0].ProductID)
+        setMainCourseId(json.Packages[0].ProductID);
         setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
         const parser = new DOMParser();
@@ -125,9 +126,12 @@ export default function App() {
 
   };
 
-  const totalPrice = mainCoursePrice +
-    selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0) +
-    (selectedMainCourseDelivery?.AdjustedPrice || 0) + (discount || 0)
+  const totalPrice = (
+    mainCoursePrice
+    + selectedUpgrades.reduce((sum, upgrade) => sum + upgrade.PriceCart + (selectedDeliveryOptions[upgrade.ProductID]?.AdjustedPrice || 0), 0)
+    + (selectedMainCourseDelivery?.AdjustedPrice || 0)
+    + (discount || 0)
+  ).toFixed(2);
 
   const handleNext = () => {
     if (step === 1) {
@@ -146,7 +150,17 @@ export default function App() {
   useEffect(() => {
     if (step === 3) {
       const paymentScript = document.createElement('script');
-      paymentScript.src = 'https://sdk.embedded-payments.a.intuit.com/embedded-payment-ui-sdk.en.js';
+
+      switch (paymentGateway) {
+        case 'intuit':
+          paymentScript.src = 'https://sdk.embedded-payments.a.intuit.com/embedded-payment-ui-sdk.en.js';
+          break;
+        case 'braintree':
+        default:
+          paymentScript.src = 'https://js.braintreegateway.com/web/dropin/1.22.1/js/dropin.min.js';
+          break;
+      }
+
       document.head.appendChild(paymentScript);
       paymentScript.onload = () => setIsPaymentScriptLoaded(true);
 
@@ -208,28 +222,37 @@ export default function App() {
             handleNext={handleNext}
             isPayLaterChecked={isPayLaterChecked}
             setIsPayLaterChecked={setIsPayLaterChecked}
+            paymentGateway={paymentGateway}
+            products={products}
           />
         )}
 
-        <Total
-          products={products}
-          selectedUpgrades={selectedUpgrades}
-          selectedDeliveryOptions={selectedDeliveryOptions}
-          selectedMainCourseDelivery={selectedMainCourseDelivery}
-          totalPrice={totalPrice}
-          step={step}
-          mainCourseId={mainCourseId}
-          regionId={regionId}
-          apiUrl={apiUrl}
-          discount={discount}
-          setDiscount={setDiscount}
-        />
+        {step === 4 && <div>Step 4</div>}
+
+        {step < 4 && (
+          <Total
+            products={products}
+            selectedUpgrades={selectedUpgrades}
+            selectedDeliveryOptions={selectedDeliveryOptions}
+            selectedMainCourseDelivery={selectedMainCourseDelivery}
+            totalPrice={totalPrice}
+            step={step}
+            mainCourseId={mainCourseId}
+            regionId={regionId}
+            apiUrl={apiUrl}
+            discount={discount}
+            setDiscount={setDiscount}
+          />
+        )}
+
       </div>
-      <div>
-        {step < 3 && <button className="next">Next</button>}
-        {step === 3 && <button className="next">Complete Payment</button>}
-        {isPayLaterChecked && <button className="paylater_next">Complete Registration</button>}
-      </div>
+      {step < 4 && (
+        <div>
+          {step < 3 && <button className="next">Next</button>}
+          {step === 3 && <button className="next">Complete Payment</button>}
+          {isPayLaterChecked && <button className="paylater_next">Complete Registration</button>}
+        </div>
+      )}
     </form>
   );
 }

@@ -12,24 +12,31 @@ export function Payment(
     handleNext,
     isPayLaterChecked,
     setIsPayLaterChecked,
+    paymentGateway,
+    products,
   }) {
 
   useEffect(() => {
     if (isPaymentScriptLoaded) {
       async function runPaymentScript() {
-        if (isPaymentScriptLoaded) {
-          const { initIntuit } = await import('../utils/intuitPayment.js');
+        if (paymentGateway === 'intuit') {
+          const { initIntuit } = await import('../utils/paymentGateway.js');
           initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice, handleNext);
+        } else if (paymentGateway === 'braintree') {
+          console.log('sdfdf');
+          const { initBraintree } = await import('../utils/paymentGateway.js');
+          await initBraintree(apiUrl, websiteId, totalPrice, setFormData, handleNext, products);
         }
       }
 
       runPaymentScript();
+
     }
   }, [isPaymentScriptLoaded]);
 
   const checkHandler = () => {
-    setIsPayLaterChecked(!isPayLaterChecked)
-  }
+    setIsPayLaterChecked(!isPayLaterChecked);
+  };
 
   return (
     <>
@@ -45,15 +52,15 @@ export function Payment(
           <div className="line line--right"></div>
         </div>
         <label className="paylater--label">
-          <input type="checkbox" id="pay-later" name="paylater" onChange={checkHandler}/>
+          <input type="checkbox" id="pay-later" name="paylater" onChange={checkHandler} />
           <span>I’d like to pay later</span>
         </label>
       </div>
       <div className="grid-area--details">
         <label className="total-text">
           TOTAL <span className="total_price">${totalPrice}</span>
-          <span className="is-closed" style={{textDecoration: 'underline'}}>(View your selection)</span>
-          <span className="is-open" style={{textDecoration: 'underline'}}>(Hide your selection)</span>
+          <span className="is-closed" style={{ textDecoration: 'underline' }}>(View your selection)</span>
+          <span className="is-open" style={{ textDecoration: 'underline' }}>(Hide your selection)</span>
           <input type="checkbox" className="expand" />
         </label>
       </div>

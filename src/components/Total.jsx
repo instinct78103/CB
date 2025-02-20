@@ -34,7 +34,6 @@ export function Total(
 
     try {
       const json = await (await fetch(url.toString())).json();
-      console.log(json?.Discount)
       setDiscount(json?.Discount || 0);
     } catch (e) {
       console.warn('Error: failed to fetch discount');
@@ -125,7 +124,7 @@ export function Total(
           {totalPrice > 0 && (
             <p className="selection total">
               <span><strong>TOTAL</strong></span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>${totalPrice}</span>
             </p>
           )}
 

@@ -6,6 +6,7 @@ GROUP := $(shell id -g)
 HOME := /nodejs
 PROJECT_NAME ?= todo
 npm := docker run -it --rm \
+		--network tdc_network \
 		-p 3000:3000 \
 		--name $(PROJECT_NAME) \
 		-v $(THIS_DIR):/nodejs \
