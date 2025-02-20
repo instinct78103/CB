@@ -6,7 +6,19 @@ export function BraintreeDropIn ({ clientToken, onInstanceReady }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!clientToken || !dropinContainer.current) return;
+
+    async function fetchTokens () {
+      const responses = [
+        fetch(`${apiUrl}/api/payment/braintree/generate-token/${websiteId}`, {method: 'POST'}).then(res => res.json()),
+        fetch(`${apiUrl}/api/payment/venmo/profile-id/${websiteId}`).then(res => res.json()),
+      ]
+
+      const [{ Token: clientToken}, { venmoId: profileId }] = await Promise.all(responses);
+    }
+
+    fetchTokens()
+
+    // if (!clientToken || !dropinContainer.current) return;
 
     dropin.create(
       {

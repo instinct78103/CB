@@ -1,3 +1,4 @@
+import '../styles/coursesSelection.css'
 export function CourseSelection(
   {
     products,

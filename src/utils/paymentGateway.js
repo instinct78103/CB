@@ -1,3 +1,5 @@
+import { dependencySetupStates } from 'braintree-web-drop-in/constants.js';
+
 export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice, handleNext) {
   const containerRef = document.querySelector('#dropin-container');
   const submitButtonRef = document.querySelector('.next');
@@ -88,7 +90,7 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
   }
 }
 
-export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, handleNext, [product]) {
+export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, handleNext, [product], setStep) {
   const responses = [
     fetch(`${apiUrl}/api/payment/braintree/generate-token/${websiteId}`, {method: 'POST'}).then(res => res.json()),
     fetch(`${apiUrl}/api/payment/venmo/profile-id/${websiteId}`).then(res => res.json()),
@@ -130,14 +132,12 @@ export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, 
       e.preventDefault();
 
       if (document.querySelector('input#pay-later').checked) {
-        console.log(32323)
-        handleNext();
+        setStep(4)
       }
 
       if (totalPrice > 0) {
         instance.requestPaymentMethod((requestPaymentMethodErr, payload) => {
           if (requestPaymentMethodErr) {
-            console.log(requestPaymentMethodErr);
             instance.clearSelectedPaymentMethod();
           } else {
             instance.teardown(teardownErr =>
@@ -155,7 +155,7 @@ export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, 
               lastfour: details.lastfour,
             }));
 
-            // handleNext();
+            setStep(4)
           }
         });
       }

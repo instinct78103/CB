@@ -142,8 +142,6 @@ export default function App() {
         return;
       }
       setStep(3);
-    } else {
-      console.log({ step });
     }
   };
 
@@ -224,6 +222,7 @@ export default function App() {
             setIsPayLaterChecked={setIsPayLaterChecked}
             paymentGateway={paymentGateway}
             products={products}
+            setStep={setStep}
           />
         )}
 
@@ -246,13 +245,14 @@ export default function App() {
         )}
 
       </div>
-      {step < 4 && (
-        <div>
-          {step < 3 && <button className="next">Next</button>}
-          {step === 3 && <button className="next">Complete Payment</button>}
-          {isPayLaterChecked && <button className="paylater_next">Complete Registration</button>}
-        </div>
-      )}
+
+      <div>
+        {step < 3 && <button className="next">Next</button>}
+        {step === 3 && <button className="next">Complete Payment</button>}
+        {isPayLaterChecked && step === 3 && <button className="paylater_next">Complete Registration</button>}
+        {step === 4 && <button className="paylater_next">Complete Registration</button>}
+      </div>
+
     </form>
   );
 }
