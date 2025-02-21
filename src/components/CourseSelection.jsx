@@ -1,5 +1,5 @@
-import '../styles/coursesSelection.css'
-export function CourseSelection(
+import '../styles/coursesSelection.scss'
+export default function CourseSelection(
   {
     products,
     upgrades,

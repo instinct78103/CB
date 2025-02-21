@@ -1,3 +1,13 @@
+.grid {
+    &.course-selection {
+        grid-template-areas:
+            'title selected'
+            'main-course selected'
+            'upgrades selected'
+            '. selected';
+    }
+}
+
 .item {
     label {
         display: flex;
@@ -22,7 +32,7 @@
             justify-content: flex-start;
         }
 
-        &:has(:is(input[type="checkbox"]:checked, input[type="radio"]:checked)) {
+        &:has(:is(input[type='checkbox']:checked, input[type='radio']:checked)) {
             &:before {
                 background-image: url('/icons/icon-check.svg');
                 background-size: cover;

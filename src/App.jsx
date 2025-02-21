@@ -1,9 +1,10 @@
-import './style.css';
+import './style.scss';
 import { useState, useEffect } from 'react';
-import { CourseSelection } from './components/CourseSelection.jsx';
-import { StudentInformation } from './components/StudentInformation.jsx';
-import { Payment } from './components/Payment.jsx';
-import { Total } from './components/Total.jsx';
+import CourseSelection from './components/CourseSelection.jsx';
+import StudentInformation from './components/StudentInformation.jsx';
+import Payment from './components/Payment.jsx';
+import Total from './components/Total.jsx';
+import Registration from './components/Registration.jsx';
 
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
@@ -178,14 +179,9 @@ export default function App() {
     );
   }
 
-  function onSubmit(e) {
-    e.preventDefault();
-    handleNext();
-  }
-
   return (
-    <form onSubmit={onSubmit} id="payment-form">
-      <div className={`grid`}>
+    <div id="main">
+      <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
         {step === 1 && (
           <CourseSelection
             products={products}
@@ -226,33 +222,36 @@ export default function App() {
           />
         )}
 
-        {step === 4 && <div>Step 4</div>}
+        <Total
+          products={products}
+          selectedUpgrades={selectedUpgrades}
+          selectedDeliveryOptions={selectedDeliveryOptions}
+          selectedMainCourseDelivery={selectedMainCourseDelivery}
+          totalPrice={totalPrice}
+          step={step}
+          mainCourseId={mainCourseId}
+          regionId={regionId}
+          apiUrl={apiUrl}
+          discount={discount}
+          setDiscount={setDiscount}
+        />
 
-        {step < 4 && (
-          <Total
-            products={products}
-            selectedUpgrades={selectedUpgrades}
-            selectedDeliveryOptions={selectedDeliveryOptions}
-            selectedMainCourseDelivery={selectedMainCourseDelivery}
-            totalPrice={totalPrice}
-            step={step}
-            mainCourseId={mainCourseId}
-            regionId={regionId}
-            apiUrl={apiUrl}
-            discount={discount}
-            setDiscount={setDiscount}
+        {step === 4 && (
+          <Registration
+            formData={formData}
+            setFormData={setFormData}
           />
         )}
 
       </div>
 
       <div>
-        {step < 3 && <button className="next">Next</button>}
+        {step < 3 && <button className="next" onClick={handleNext}>Next</button>}
         {step === 3 && <button className="next">Complete Payment</button>}
-        {isPayLaterChecked && step === 3 && <button className="paylater_next">Complete Registration</button>}
-        {step === 4 && <button className="paylater_next">Complete Registration</button>}
+        {isPayLaterChecked && step === 3 && <button className="paylater_next" onClick={() => setStep(4)}>Complete Registration</button>}
+        {step === 4 && <button className="next">Complete Registration</button>}
       </div>
 
-    </form>
+    </div>
   );
 }

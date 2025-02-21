@@ -1,3 +1,36 @@
+.grid {
+    &.payment {
+        grid-template-columns: 1fr fit-content(100%) 300px;
+        grid-template-areas:
+            'title title selected'
+            'heading pay_later selected'
+            'gateway gateway selected'
+            'error_text error_text selected';
+        gap: 10px 20px;
+
+        @media (width < 1000px) {
+            & {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    'title'
+                    'heading'
+                    'details'
+                    'selected'
+                    'gateway'
+                    'pay_later'
+                    'error_text';
+            }
+        }
+
+        :is(.grid-area--selected, .grid-area--selected > .wrap) {
+            @media (width < 1000px) {
+                overflow: hidden;
+            }
+        }
+
+    }
+}
+
 :is(label:has(#pay-later), .total-text) {
     &:before {
         content: unset;
@@ -21,7 +54,7 @@ label:has(> #pay-later) {
 
     @media (width < 1000px) {
         justify-content: center;
-        border: 1px solid #E1E1E1;
+        border: 1px solid #e1e1e1;
         border-radius: 3px;
         padding: 10px;
     }
@@ -81,11 +114,11 @@ label:has(> #pay-later) {
 
     .line {
         height: 1px;
-        background: #E1E1E1;
+        background: #e1e1e1;
     }
 }
 
-#payment-form{
+#main {
     .expand {
         display: none;
     }
@@ -119,7 +152,7 @@ label:has(> #pay-later) {
     }
 
     &:has(#pay-later:checked) {
-        #complete-payment, #dropin-container, [id*="zoid"], button:not(.is_pay_later):not(.apply-coupon):not(.paylater_next), iframe {
+        #complete-payment, #dropin-container, [id*='zoid'], button:not(.is_pay_later):not(.apply-coupon):not(.paylater_next), iframe {
             display: none !important;
         }
     }

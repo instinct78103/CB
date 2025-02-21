@@ -1,0 +1,66 @@
+.grid {
+    &.registration {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            'text selected'
+            'form form';
+        align-items: center;
+        text-wrap: balance;
+
+        @media(width < 768px) {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                'text'
+                'selected'
+                'form';
+        }
+
+        .text {
+            display: grid;
+            gap: 10px;
+
+            @media(width < 768px) {
+                text-align: center;
+            }
+
+            &--heading {
+                font-size: 22px;
+                font-weight: 600;
+            }
+        }
+
+        .form-panel {
+            grid-area: form;
+            display: grid;
+            gap: 20px;
+
+            &--heading {
+                padding: 10px;
+                text-align: center;
+                background-color: #f2f3f5;
+                font-size: 16px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+        }
+
+        .form-wrap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 25%, 375px), 1fr));
+            gap: 20px;
+        }
+
+        .selection.total {
+            background-color: #f2f3f5;
+        }
+
+        .title {
+            --title-bg-color: #f2f3f5;
+            --title-color: #000;
+        }
+
+        & + div:has(> .next) {
+            --btn-bg-color: #ffa300;
+        }
+    }
+}

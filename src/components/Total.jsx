@@ -1,7 +1,7 @@
-import '../styles/total.css';
+import '../styles/total.scss';
 import { useState } from 'react';
 
-export function Total(
+export default function Total(
   {
     products,
     selectedUpgrades,
@@ -46,7 +46,7 @@ export function Total(
   return (
     <div className="column-total grid-area--selected">
       <div className="wrap">
-        <div className="title">YOUR SELECTION</div>
+        <div className="title">{step === 4 ? 'Order Summary' : 'Your Selection'}</div>
         <div className="total-wrap">
 
           {products?.length > 0 && (
@@ -106,9 +106,12 @@ export function Total(
           }
 
           {step === 3 && (
-            <div className="selection discount-code">
+            <form className="selection discount-code" onSubmit={(e) => {
+              e.preventDefault()
+              fetchDiscount(coupon);
+            }}>
               <input type="text" name="discount_code" placeholder="Discount code" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
-              <button className="apply-coupon" type="button" disabled={isCouponLoading} onClick={() => fetchDiscount(coupon)}>
+              <button className="apply-coupon" disabled={isCouponLoading}>
                 {isCouponLoading && (
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50" aria-label="Loading...">
                     <circle cx="25" cy="25" r="20" fill="none" stroke="#fff" strokeWidth="4" strokeDasharray="31.4 31.4" strokeLinecap="round" transform="rotate(-90, 25, 25)">
@@ -118,7 +121,7 @@ export function Total(
                 )}
                 {!isCouponLoading && 'Apply'}
               </button>
-            </div>
+            </form>
           )}
 
           {totalPrice > 0 && (

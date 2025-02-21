@@ -1,6 +1,4 @@
-import { dependencySetupStates } from 'braintree-web-drop-in/constants.js';
-
-export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice, handleNext) {
+export function initIntuit(firstname, lastname, email, setFormData, apiUrl, websiteId, totalPrice, setStep) {
   const containerRef = document.querySelector('#dropin-container');
   const submitButtonRef = document.querySelector('.next');
 
@@ -44,7 +42,7 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
         console.log('Submitting payment... ', nonce);
 
         setFormData(prevFormData => ({ ...prevFormData, RiskProfileToken, nonce }));
-        handleNext()
+        setStep(4)
       },
       handlePayPalCreateOrder: async () => {
         console.log('Creating PayPal order...');
@@ -77,7 +75,7 @@ export function initIntuit(firstname, lastname, email, setFormData, apiUrl, webs
       },
       handlePayPalApproveOrder: async () => {
         console.log('Approving PayPal order...');
-        handleNext();
+        setStep(4);
       },
     });
 
@@ -128,8 +126,7 @@ export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, 
       },
     },
   }, function (createErr, instance) {
-    document.querySelector('#payment-form').addEventListener('submit', function (e) {
-      e.preventDefault();
+    document.querySelector('.next').addEventListener('click', () => {
 
       if (document.querySelector('input#pay-later').checked) {
         setStep(4)

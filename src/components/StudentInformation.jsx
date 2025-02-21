@@ -1,6 +1,6 @@
-import '../styles/studentInformation.css';
+import '../styles/studentInformation.scss';
 
-export function StudentInformation(
+export default function StudentInformation(
   {
     formData,
     setFormData,
@@ -15,28 +15,28 @@ export function StudentInformation(
         <div className="wrap">
           <div>
             <input
-              type="text" placeholder="First Name" name="firstname" maxLength={64}
+              type="text" placeholder="First Name" name="firstname" maxLength={48}
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="text" placeholder="Last Name" name="lastname" maxLength={64}
+              type="text" placeholder="Last Name" name="lastname" maxLength={48}
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="email" placeholder="Email" name="email" maxLength={64}
+              type="email" placeholder="Email" name="email" maxLength={48}
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="tel" placeholder="Phone" name="phone" maxLength={10}
+              type="tel" placeholder="Phone" name="phone" maxLength={11}
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />

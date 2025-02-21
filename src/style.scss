@@ -1,5 +1,8 @@
 :root {
     --gap: 20px;
+    --_btn-bg-color: #f1685c;
+    --_title-bg-color: #014785;
+    --_title-color: #fff;
 }
 
 *, :before, :after {
@@ -7,6 +10,20 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+}
+
+select,
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='tel'] {
+    display: block;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #e3e3e3;
+    width: 100%;
+    background-color: #fff;
+    color: #7e828b;
 }
 
 body {
@@ -28,12 +45,12 @@ input {
 .title {
     text-align: center;
     padding: 10px;
-    background: #014785;
-    color: #fff;
+    background: var(--title-bg-color, var(--_title-bg-color));
+    color: var(--title-color, var(--_title-color));
     text-transform: uppercase;
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
-    font-weight: 400;
+    font-weight: 600;
     text-wrap: balance;
 }
 
@@ -50,7 +67,7 @@ div:has(> :is(.next, .paylater_next)) {
 }
 
 .next, .paylater_next {
-    background: #f1685c;
+    background: var(--btn-bg-color, var(--_btn-bg-color));
     border: none;
     padding: 10px;
     color: #fff;
@@ -59,13 +76,9 @@ div:has(> :is(.next, .paylater_next)) {
     text-transform: uppercase;
     font-weight: 600;
     cursor: pointer;
-    width: fit-content;
-    min-width: 300px;
+    min-width: fit-content;
+    width: min(300px, calc(100% - 40px));
     margin-inline: auto;
-}
-
-.grid + .grid {
-
 }
 
 .products-list {
@@ -146,54 +159,9 @@ div:has(>.title) {
         }
     }
 
-    &:has(>.products-list) {
-        grid-template-areas:
-            'title selected'
-            'main-course selected'
-            'upgrades selected'
-            '. selected';
-    }
-
-    &:has(> .student-info) {
-        grid-template-areas:
-            'student-info selected'
-            'delivery selected'
-            '. selected';
-    }
-
     &:has(> .payment) {
         grid-template-areas:
             'payment selected'
-    }
-
-    &:has(> .grid-area--gateway) {
-        grid-template-columns: 1fr fit-content(100%) 300px;
-        grid-template-areas:
-            'title title selected'
-            'heading pay_later selected'
-            'gateway gateway selected'
-            'error_text error_text selected';
-        gap: 10px 20px;
-
-        @media (width < 1000px) {
-            & {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    'title'
-                    'heading'
-                    'details'
-                    'selected'
-                    'gateway'
-                    'pay_later'
-                    'error_text';
-            }
-        }
-
-        :is(.grid-area--selected, .grid-area--selected > .wrap) {
-            @media (width < 1000px) {
-                overflow: hidden;
-            }
-        }
     }
 }
 

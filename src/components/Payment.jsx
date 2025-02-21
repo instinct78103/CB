@@ -1,8 +1,7 @@
-import '../styles/payment.css';
+import '../styles/payment.scss';
 import { useEffect } from 'react';
-import { BraintreeDropIn } from './BraintreeDropIn.jsx';
 
-export function Payment(
+export default function Payment(
   {
     formData: { firstName, lastName, email },
     isPaymentScriptLoaded,
@@ -23,7 +22,7 @@ export function Payment(
       async function runPaymentScript() {
         if (paymentGateway === 'intuit') {
           const { initIntuit } = await import('../utils/paymentGateway.js');
-          initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice, handleNext);
+          initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice, setStep);
         } else if (paymentGateway === 'braintree') {
           const { initBraintree } = await import('../utils/paymentGateway.js');
           await initBraintree(apiUrl, websiteId, totalPrice, setFormData, handleNext, products, setStep);
@@ -67,7 +66,6 @@ export function Payment(
       </div>
       <div className="grid-area--gateway">
         <div id="dropin-container"></div>
-        {/*<BraintreeDropIn/>*/}
         <div className="later-description">
           <p>We offer a 30-day free-trial for those who need to enroll in traffic school, but aren't ready to pay. You will not be able to take the final exam until after payment is received. If you do not pay within 30 days, your account will be disabled until you make your payment in full. You have the option to pay online or over the phone. Our traffic ticket specialists can assist you with any questions you may have.</p>
         </div>
