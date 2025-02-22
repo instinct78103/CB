@@ -249,7 +249,7 @@ export default function App() {
         {step < 3 && <button className="next" onClick={handleNext}>Next</button>}
         {step === 3 && <button className="next">Complete Payment</button>}
         {isPayLaterChecked && step === 3 && <button className="paylater_next" onClick={() => setStep(4)}>Complete Registration</button>}
-        {step === 4 && <button className="next">Complete Registration</button>}
+        {step === 4 && <button className="next" form={'user-registration'}>Complete Registration</button>}
       </div>
 
     </div>

@@ -1,4 +1,32 @@
+import '../styles/registration.scss';
+import Turnstile from 'react-turnstile';
+import { useState } from 'react';
+
 export default function Registration({ formData, setFormData }) {
+
+  const [token, setToken] = useState('');
+  const turnstileSiteKey = document.querySelector('#root')?.getAttribute('data-turnstile_sitekey');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!token || !turnstileSiteKey) {
+      alert('CAPTCHA verification failed. Please complete the CAPTCHA.');
+      return;
+    }
+
+    setFormData(prevFormData => ({ ...prevFormData, turnstileToken: token }));
+
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+
+    const result = await response.json();
+
+    alert(result.message);
+  }
 
   return (
     <>
@@ -10,7 +38,7 @@ export default function Registration({ formData, setFormData }) {
       <div className="form-panel">
         <div className="form-panel--heading">Course Access</div>
         <div className="form-panel--body">
-          <form id="user-registration">
+          <form id="user-registration" onSubmit={handleSubmit}>
             <div className="form-wrap">
               <div>
                 <input
@@ -51,6 +79,12 @@ export default function Registration({ formData, setFormData }) {
               </div>
               <div><input type="password" placeholder="Password" /></div>
               <div><input type="password" placeholder="Repeat Password" /></div>
+            </div>
+            <div className="turnstile-widget">
+              <Turnstile
+                sitekey={turnstileSiteKey}
+                onVerify={(token) => setToken(token)}
+              />
             </div>
           </form>
         </div>

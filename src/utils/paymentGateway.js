@@ -128,7 +128,7 @@ export async function initBraintree(apiUrl, websiteId, totalPrice, setFormData, 
   }, function (createErr, instance) {
     document.querySelector('.next').addEventListener('click', () => {
 
-      if (document.querySelector('input#pay-later').checked) {
+      if (document.querySelector('input#pay-later')?.checked) {
         setStep(4)
       }
 

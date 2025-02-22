@@ -48,6 +48,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 25%, 375px), 1fr));
             gap: 20px;
+            width: 100%;
         }
 
         .selection.total {
@@ -61,6 +62,13 @@
 
         & + div:has(> .next) {
             --btn-bg-color: #ffa300;
+        }
+
+        #user-registration {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
         }
     }
 }
