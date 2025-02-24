@@ -5,20 +5,27 @@ import StudentInformation from './components/StudentInformation.jsx';
 import Payment from './components/Payment.jsx';
 import Total from './components/Total.jsx';
 import Registration from './components/Registration.jsx';
+import SelectCountyAndCourt from './components/SelectCountyAndCourt.jsx';
 
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
   const paymentGateway = document.querySelector('#root')?.getAttribute('data-paymentGateway');
+  const isCountyEnabled = document.querySelector('#root')?.getAttribute('data-countyEnabled') === 'yes';
 
   if (!websiteId || !apiUrl || !paymentGateway) {
     return;
   }
 
   const [loading, setLoading] = useState(true);
-  const [regionId, setRegionId] = useState(null);
+  const [region, setRegion] = useState(null);
   const [step, setStep] = useState(1);
   const [products, setProducts] = useState([]);
+
+  const [counties, setCounties] = useState([]);
+  const [countyId, setCountyId] = useState(null);
+  const [courts, setCourts] = useState([]);
+  const [courtId, setCourtId] = useState('');
 
   const [mainCoursePrice, setMainCoursePrice] = useState(0);
   const [mainCourseId, setMainCourseId] = useState(null);
@@ -36,29 +43,41 @@ export default function App() {
   const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
   const [discount, setDiscount] = useState(0);
 
+  /**
+   * Get region by search params
+   */
   useEffect(() => {
-    const currentState = new URL(window.location).searchParams.get('st');
+    const currentState = new URL(window.location).searchParams.get('st').toLowerCase();
     if (!currentState) return;
 
-    const fetchRegionId = async () => {
+    const fetchRegionBySearchParam = async () => {
       try {
         const json = await (await fetch(`${apiUrl}/api/region/states`)).json();
-        const region = json.find(item => item.RegionCode === currentState).RegionID;
-        setRegionId(region);
+        const region = json.find(
+          ({
+             RegionCode,
+             RegionName,
+           }) => RegionCode.toLowerCase() === currentState || RegionName.toLowerCase() === currentState,
+        );
+        setRegion(region);
       } catch (e) {
-        console.warn('Error');
+        console.warn('Can\'t find region for state: ' + currentState);
       }
     };
 
-    fetchRegionId();
+    fetchRegionBySearchParam();
 
   }, []);
 
+  /**
+   * Get state products
+   */
   useEffect(() => {
-    if (!regionId) return;
-    const fetchProducts = async () => {
+    if (!region || isCountyEnabled) return;
+
+    const fetchStateProducts = async () => {
       try {
-        const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${regionId}`)).json();
+        const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${region.RegionID}`)).json();
         console.log(json.Packages);
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
@@ -77,10 +96,67 @@ export default function App() {
       }
     };
 
-    fetchProducts();
+    fetchStateProducts();
+  }, [region]);
 
-  }, [regionId]);
+  /**
+   * Get counties
+   */
+  useEffect(() => {
+    if (isCountyEnabled && region) {
+      async function fetchCounties() {
+        try {
+          const json = await (await fetch(`${apiUrl}/api/region/counties/${websiteId}/${region.RegionID}`)).json();
+          setCounties(json);
+        } catch (e) {
+          console.warn('Error: ' + e);
+        } finally {
+          setLoading(false);
+        }
+      }
 
+      fetchCounties();
+    }
+  }, [region]);
+
+  /**
+   * Get courts by county
+   */
+  useEffect(() => {
+    if (countyId) {
+      async function fetchCourtsByCounty() {
+        const courts = await (await fetch(`${apiUrl}/api/region/courts/${websiteId}/${countyId}`)).json();
+        setCourts(courts);
+      }
+
+      fetchCourtsByCounty();
+    }
+
+  }, [countyId]);
+
+  useEffect(() => {
+    if (courtId) {
+      async function fetchProductsByCourt() {
+        const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}&attendingreason=None`)).json();
+        console.log(json.Packages)
+        setProducts([json.Packages[0]]);
+        setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
+        setMainCoursePrice(json.Packages[0].Price);
+        setMainCourseId(json.Packages[0].ProductID);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
+        setMainCourseDesc(doc.body.textContent.trim() || '');
+      }
+
+      fetchProductsByCourt()
+    }
+
+  }, [courtId]);
+
+  /**
+   *
+   */
   useEffect(() => {
     if (mainCourseDeliveryOptions?.length) {
       const cheapestOption = mainCourseDeliveryOptions.reduce((min, option) =>
@@ -181,8 +257,21 @@ export default function App() {
 
   return (
     <div id="main">
+
       <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
-        {step === 1 && (
+
+        {isCountyEnabled && counties.length > 0 && (
+          <SelectCountyAndCourt
+            region={region}
+            counties={counties}
+            countyId={countyId}
+            setCountyId={setCountyId}
+            courts={courts}
+            setCourtId={setCourtId}
+          />
+        )}
+
+        {step === 1 && products.length > 0 && (
           <CourseSelection
             products={products}
             upgrades={upgrades}
@@ -222,19 +311,21 @@ export default function App() {
           />
         )}
 
-        <Total
-          products={products}
-          selectedUpgrades={selectedUpgrades}
-          selectedDeliveryOptions={selectedDeliveryOptions}
-          selectedMainCourseDelivery={selectedMainCourseDelivery}
-          totalPrice={totalPrice}
-          step={step}
-          mainCourseId={mainCourseId}
-          regionId={regionId}
-          apiUrl={apiUrl}
-          discount={discount}
-          setDiscount={setDiscount}
-        />
+        {products.length > 0 && (
+          <Total
+            products={products}
+            selectedUpgrades={selectedUpgrades}
+            selectedDeliveryOptions={selectedDeliveryOptions}
+            selectedMainCourseDelivery={selectedMainCourseDelivery}
+            totalPrice={totalPrice}
+            step={step}
+            mainCourseId={mainCourseId}
+            regionId={region.RegionID}
+            apiUrl={apiUrl}
+            discount={discount}
+            setDiscount={setDiscount}
+          />
+        )}
 
         {step === 4 && (
           <Registration
@@ -248,7 +339,8 @@ export default function App() {
       <div>
         {step < 3 && <button className="next" onClick={handleNext}>Next</button>}
         {step === 3 && <button className="next">Complete Payment</button>}
-        {isPayLaterChecked && step === 3 && <button className="paylater_next" onClick={() => setStep(4)}>Complete Registration</button>}
+        {isPayLaterChecked && step === 3 &&
+          <button className="paylater_next" onClick={() => setStep(4)}>Complete Registration</button>}
         {step === 4 && <button className="next" form={'user-registration'}>Complete Registration</button>}
       </div>
 

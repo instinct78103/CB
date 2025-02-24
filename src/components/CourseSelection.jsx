@@ -1,4 +1,5 @@
-import '../styles/coursesSelection.scss'
+import '../styles/coursesSelection.scss';
+
 export default function CourseSelection(
   {
     products,
@@ -21,7 +22,7 @@ export default function CourseSelection(
               {products.map((product) => (
                 <label key={product.ProductID}>
                   <div>
-                    <input style={{ display: 'none' }} type="radio" checked />
+                    <input style={{ display: 'none' }} type="radio" defaultChecked={true} />
                     <p className={'product-name'}>{product.Name}</p>
                     <p className={'product-price'}>${product.Price}</p>
                   </div>

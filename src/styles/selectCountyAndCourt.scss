@@ -1,0 +1,6 @@
+.county-court-selection {
+    > .wrap {
+        --gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(min(300px, 50%), 1fr));
+    }
+}
