@@ -23,7 +23,7 @@ export default function App() {
   const [products, setProducts] = useState([]);
 
   const [counties, setCounties] = useState([]);
-  const [countyId, setCountyId] = useState(null);
+  const [countyId, setCountyId] = useState('');
   const [courts, setCourts] = useState([]);
   const [courtId, setCourtId] = useState('');
 
@@ -212,6 +212,9 @@ export default function App() {
 
   const handleNext = () => {
     if (step === 1) {
+      if (!products.length) {
+        return;
+      }
       setStep(2);
     } else if (step === 2) {
       if (!formData.firstName || !formData.lastName || !/\S+@\S+\.\S+/.test(formData.email) || !/^\d{10}$/.test(formData.phone)) {
@@ -260,7 +263,7 @@ export default function App() {
 
       <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
 
-        {isCountyEnabled && counties.length > 0 && (
+        {step === 1 && isCountyEnabled && counties.length > 0 && (
           <SelectCountyAndCourt
             region={region}
             counties={counties}
@@ -268,6 +271,10 @@ export default function App() {
             setCountyId={setCountyId}
             courts={courts}
             setCourtId={setCourtId}
+            setProducts={setProducts}
+            setCourts={setCourts}
+            courtId={courtId}
+            setSelectedUpgrades={setSelectedUpgrades}
           />
         )}
 
@@ -281,6 +288,7 @@ export default function App() {
             toggleUpgrades={toggleUpgrades}
             selectedDeliveryOptions={selectedDeliveryOptions}
             setSelectedDeliveryOptions={setSelectedDeliveryOptions}
+            isCountyEnabled={isCountyEnabled}
           />
         )}
 

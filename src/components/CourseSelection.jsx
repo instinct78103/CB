@@ -10,13 +10,14 @@ export default function CourseSelection(
     setSelectedDeliveryOptions,
     deliveryOptions,
     toggleUpgrades,
+    isCountyEnabled,
   }) {
 
   return (
     <>
       {products?.length > 0 && (
         <>
-          <div className="title grid-area--title">Courses Selection</div>
+          {!isCountyEnabled && <div className="title grid-area--title">Courses Selection</div>}
           <ul className={'products-list grid-area--main-course'}>
             <li className={'item'}>
               {products.map((product) => (
