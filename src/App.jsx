@@ -140,7 +140,7 @@ export default function App() {
     if (courtId) {
       async function fetchProductsByCourt() {
         try {
-          const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}&attendingreason=None`)).json();
+          const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}`)).json();
           setProducts([json.Packages[0]]);
           setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
           setMainCoursePrice(json.Packages[0].Price);
