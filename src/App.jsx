@@ -78,7 +78,6 @@ export default function App() {
     const fetchStateProducts = async () => {
       try {
         const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${region.RegionID}`)).json();
-        console.log(json.Packages);
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
@@ -90,7 +89,7 @@ export default function App() {
         setMainCourseDesc(doc.body.textContent.trim() || '');
         setLoading(false);
       } catch (e) {
-        console.warn('Error: ' + e);
+        console.warn('Can\'t fetch products: ' + e);
       } finally {
         setLoading(false);
       }
@@ -134,28 +133,38 @@ export default function App() {
 
   }, [countyId]);
 
+  /**
+   * todo: remove duplicate code
+   */
   useEffect(() => {
     if (courtId) {
       async function fetchProductsByCourt() {
-        const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}&attendingreason=None`)).json();
-        console.log(json.Packages)
-        setProducts([json.Packages[0]]);
-        setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
-        setMainCoursePrice(json.Packages[0].Price);
-        setMainCourseId(json.Packages[0].ProductID);
+        try {
+          const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}&attendingreason=None`)).json();
+          setProducts([json.Packages[0]]);
+          setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
+          setMainCoursePrice(json.Packages[0].Price);
+          setMainCourseId(json.Packages[0].ProductID);
+          setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
-        setMainCourseDesc(doc.body.textContent.trim() || '');
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(json.Packages[0].Description, 'text/html');
+          setMainCourseDesc(doc.body.textContent.trim() || '');
+          setLoading(false);
+        } catch (e) {
+          console.warn('Can\'t fetch courts products: ' + e);
+        } finally {
+          setLoading(false);
+        }
       }
 
-      fetchProductsByCourt()
+      fetchProductsByCourt();
     }
 
   }, [courtId]);
 
   /**
-   *
+   * Set min delivery option automatically
    */
   useEffect(() => {
     if (mainCourseDeliveryOptions?.length) {
@@ -167,7 +176,6 @@ export default function App() {
   }, [mainCourseDeliveryOptions]);
 
   const toggleUpgrades = (item) => {
-
     setSelectedUpgrades((prev) => {
       const alreadySelected = prev.some((i) => i.ProductID === item.ProductID);
 
