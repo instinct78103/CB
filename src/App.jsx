@@ -7,11 +7,14 @@ import Total from './components/Total.jsx';
 import Registration from './components/Registration.jsx';
 import SelectCountyAndCourt from './components/SelectCountyAndCourt.jsx';
 
+import { init, tag } from '@blotoutio/edgetag-sdk-js';
+
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
   const paymentGateway = document.querySelector('#root')?.getAttribute('data-paymentGateway');
   const isCountyEnabled = document.querySelector('#root')?.getAttribute('data-countyEnabled') === 'yes';
+  const edgeURL = document.querySelector('#root')?.getAttribute('data-edgeURL');
 
   if (!websiteId || !apiUrl || !paymentGateway) {
     return;
@@ -27,8 +30,9 @@ export default function App() {
   const [courts, setCourts] = useState([]);
   const [courtId, setCourtId] = useState('');
 
-  const [mainCoursePrice, setMainCoursePrice] = useState(0);
   const [mainCourseId, setMainCourseId] = useState(null);
+  const [mainCourseName, setMainCourseName] = useState('');
+  const [mainCoursePrice, setMainCoursePrice] = useState(0);
   const [mainCourseDeliveryOptions, setMainCourseDeliveryOptions] = useState([]);
   const [selectedMainCourseDelivery, setSelectedMainCourseDelivery] = useState(null);
   const [mainCourseDesc, setMainCourseDesc] = useState('');
@@ -82,6 +86,7 @@ export default function App() {
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
         setMainCourseId(json.Packages[0].ProductID);
+        setMainCourseName(json.Packages[0].Name);
         setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
         const parser = new DOMParser();
@@ -145,6 +150,7 @@ export default function App() {
           setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
           setMainCoursePrice(json.Packages[0].Price);
           setMainCourseId(json.Packages[0].ProductID);
+          setMainCourseName(json.Packages[0].Name);
           setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
           const parser = new DOMParser();
@@ -253,6 +259,61 @@ export default function App() {
       return () => document.head.removeChild(paymentScript);
     }
   }, [step]);
+
+  /**
+   * edgeTag
+   */
+  useEffect(() => {
+    init({
+      edgeURL,
+      disableConsentCheck: true,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (step > 1) {
+
+      switch (step) {
+        case 2:
+          tag('Registration_Selection', {
+            product: mainCourseName,
+            upgrades: selectedUpgrades.map(({ Name: name }) => name).join(', '),
+            totalPrice,
+          });
+          break;
+        case 3:
+          tag('data', {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+          });
+          tag('Registration_Student_Info', { totalPrice });
+          break;
+        case 4:
+          tag('Registration_Payment', { totalPrice });
+          if (isPayLaterChecked) {
+            tag('Registration_Payment', { totalPrice }, null, { method: 'beacon' });
+          }
+          break;
+        case 5:
+          tag('Registration_Complete', { totalPrice });
+          break;
+        case 6:
+          tag('Registration_Receipt', { totalPrice });
+        /**
+         * todo: figure out the click event below
+         */
+        // $('a[title="START COURSE"]').on('click', () => {
+        //   total_price = parseFloat($('.totals').find('.price').text().trim().slice(1));
+        //   edgetag('tag', 'Registration_Start_Course', { total_price }, {}, { method: 'beacon' });
+        // });
+      }
+    }
+  }, [step, isPayLaterChecked]);
+  /**
+   * edgeTag -- end
+   */
 
   if (loading) {
     return (
