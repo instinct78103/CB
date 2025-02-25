@@ -23,6 +23,14 @@ export default function SelectCountyAndCourt(
     }
   }, [countyId]);
 
+  useEffect(() => {
+    if (!courtId) {
+      setProducts([]);
+      setSelectedUpgrades([]);
+    }
+
+  }, [courtId]);
+
   return (
     <div className="county-court-selection">
       <div className="title">{region.RegionName} course selection</div>
