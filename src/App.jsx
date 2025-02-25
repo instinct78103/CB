@@ -51,7 +51,7 @@ export default function App() {
    * Get region by search params
    */
   useEffect(() => {
-    const currentState = new URL(window.location).searchParams.get('st').toLowerCase();
+    const currentState = new URL(window.location).searchParams.get('st')?.toLowerCase();
     if (!currentState) return;
 
     const fetchRegionBySearchParam = async () => {
