@@ -1,14 +1,12 @@
 import './style.scss';
-import { useState, useEffect } from 'react';
-import CourseSelection from './components/CourseSelection.jsx';
-import StudentInformation from './components/StudentInformation.jsx';
-import Payment from './components/Payment.jsx';
-import Total from './components/Total.jsx';
-import Registration from './components/Registration.jsx';
-import SelectCountyAndCourt from './components/SelectCountyAndCourt.jsx';
+import React, { useState, useEffect } from 'react';
 
-import { init, tag } from '@blotoutio/edgetag-sdk-js';
-
+const CourseSelection = React.lazy(() => import( './components/CourseSelection.jsx'));
+const StudentInformation = React.lazy(() => import( './components/StudentInformation.jsx'));
+const Payment = React.lazy(() => import( './components/Payment.jsx'));
+const Total = React.lazy(() => import( './components/Total.jsx'));
+const Registration = React.lazy(() => import( './components/Registration.jsx'));
+const SelectCountyAndCourt = React.lazy(() => import( './components/SelectCountyAndCourt.jsx'));
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
@@ -46,6 +44,7 @@ export default function App() {
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
   const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
   const [discount, setDiscount] = useState(0);
+  const [edgeTag, setEdgeTag] = useState(null);
 
   /**
    * Get region by search params
@@ -131,8 +130,8 @@ export default function App() {
       async function fetchCourtsByCounty() {
         const courts = await (await fetch(`${apiUrl}/api/region/courts/${websiteId}/${countyId}`)).json();
         setCourts(courts);
-        if(courts?.length === 1) {
-          setCourtId(courts[0].RegionID)
+        if (courts?.length === 1) {
+          setCourtId(courts[0].RegionID);
         }
       }
 
@@ -267,14 +266,23 @@ export default function App() {
    * edgeTag
    */
   useEffect(() => {
-    init({
-      edgeURL,
-      disableConsentCheck: true,
-    });
-  }, []);
+    if (step < 2) return;
 
-  useEffect(() => {
-    if (step > 1) {
+    async function getSdkAndTag() {
+      if (!edgeTag) {
+        const { init, tag } = await import('@blotoutio/edgetag-sdk-js');
+        init({
+          edgeURL,
+          disableConsentCheck: true,
+        });
+        setEdgeTag(() => tag);
+        return tag;
+      }
+      return edgeTag;
+    }
+
+    getSdkAndTag().then((tag) => {
+      if (!tag) return;
 
       switch (step) {
         case 2:
@@ -304,15 +312,16 @@ export default function App() {
           break;
         case 6:
           tag('Registration_Receipt', { totalPrice });
-        /**
-         * todo: figure out the click event below
-         */
-        // $('a[title="START COURSE"]').on('click', () => {
-        //   total_price = parseFloat($('.totals').find('.price').text().trim().slice(1));
-        //   edgetag('tag', 'Registration_Start_Course', { total_price }, {}, { method: 'beacon' });
-        // });
+          /**
+           * todo: figure out the click event below
+           */
+          // $('a[title="START COURSE"]').on('click', () => {
+          //   total_price = parseFloat($('.totals').find('.price').text().trim().slice(1));
+          //   edgetag('tag', 'Registration_Start_Course', { total_price }, {}, { method: 'beacon' });
+          // });
+          break;
       }
-    }
+    });
   }, [step, isPayLaterChecked]);
   /**
    * edgeTag -- end
