@@ -17,7 +17,7 @@ export default function Total(
   }) {
 
   const [coupon, setCoupon] = useState('');
-  const [isCouponLoading, setIsCouponLoading] = useState(false)
+  const [isCouponLoading, setIsCouponLoading] = useState(false);
 
   async function fetchDiscount(coupon) {
 
@@ -30,21 +30,32 @@ export default function Total(
     url.searchParams.set('ProductID', mainCourseId);
     url.searchParams.set('RegionID', regionId);
 
-    setIsCouponLoading(true)
+    setIsCouponLoading(true);
 
     try {
       const json = await (await fetch(url.toString())).json();
       setDiscount(json?.Discount || 0);
     } catch (e) {
       console.warn('Error: failed to fetch discount');
-      setIsCouponLoading(false)
+      setIsCouponLoading(false);
     } finally {
-      setIsCouponLoading(false)
+      setIsCouponLoading(false);
     }
   }
 
   return (
-    <div className="column-total grid-area--selected">
+    <div className="column-total grid-area--selected" style={{'--content-size': `${step === 4 ? '1fr' : ''}`, position: `${step === 4 ? 'static' : 'sticky'}`}}>
+
+      {step < 3 && <div className="total-label">
+        <label className="total-text">
+          TOTAL <span className="total_price">${totalPrice}</span>
+          <input type="checkbox" className="expand" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M12 8.7L5.3 15.4c-.4.4-1 .4-1.4 0s-.4-1 0-1.4l7-7c.4-.4 1-.4 1.4 0l7 7c.4.4.4 1 0 1.4s-1 .4-1.4 0L12 8.7z"></path>
+          </svg>
+        </label>
+      </div>}
+
       <div className="wrap">
         <div className="title">{step === 4 ? 'Order Summary' : 'Your Selection'}</div>
         <div className="total-wrap">
@@ -107,7 +118,7 @@ export default function Total(
 
           {step === 3 && (
             <form className="selection discount-code" onSubmit={(e) => {
-              e.preventDefault()
+              e.preventDefault();
               fetchDiscount(coupon);
             }}>
               <input type="text" name="discount_code" placeholder="Discount code" value={coupon} onChange={(e) => setCoupon(e.target.value)} />

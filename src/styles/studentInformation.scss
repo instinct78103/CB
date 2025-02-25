@@ -5,7 +5,15 @@
             'delivery selected'
             '. selected';
 
-        div:has(> :is(input[type="text"], input[type="email"], input[type="tel"])) {
+        @media (width < 1000px) {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                'student-info'
+                'delivery'
+                'selected';
+        }
+
+        div:has(> :is(input[type='text'], input[type='email'], input[type='tel'])) {
             position: relative;
 
             &:before {
@@ -19,27 +27,27 @@
             }
         }
 
-        div:has(> input[type="text"]) {
+        div:has(> input[type='text']) {
             &:before {
                 background-image: url(/icons/icon-user.svg);
             }
         }
 
-        div:has(> input[type="email"]) {
+        div:has(> input[type='email']) {
             &:before {
                 background-image: url(/icons/icon-email.svg);
             }
         }
 
-        div:has(> input[type="tel"]) {
+        div:has(> input[type='tel']) {
             &:before {
                 background-image: url(/icons/icon-phone.svg);
             }
         }
 
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"] {
+        input[type='text'],
+        input[type='email'],
+        input[type='tel'] {
             padding-left: 32px;
         }
     }

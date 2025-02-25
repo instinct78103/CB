@@ -9,17 +9,15 @@
         gap: 10px 20px;
 
         @media (width < 1000px) {
-            & {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    'title'
-                    'heading'
-                    'details'
-                    'selected'
-                    'gateway'
-                    'pay_later'
-                    'error_text';
-            }
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                'title'
+                'heading'
+                'details'
+                'selected'
+                'gateway'
+                'pay_later'
+                'error_text';
         }
 
         :is(.grid-area--selected, .grid-area--selected > .wrap) {

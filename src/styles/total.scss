@@ -1,3 +1,61 @@
+.column-total {
+    @media (width < 1000px) {
+        gap: 20px;
+    }
+
+    .wrap {
+        @media(width < 1000px) {
+            overflow: hidden;
+            transition: .3s ease-in-out;
+        }
+    }
+
+    &:has(.expand:checked) {
+
+        --rotate: 0.5turn;
+
+        .wrap {
+            @media(width < 1000px) {
+                height: calc-size(auto, size);
+            }
+        }
+    }
+
+    &:has(.expand:not(:checked)) {
+        .wrap {
+            @media(width < 1000px) {
+                height: 0;
+            }
+        }
+    }
+
+    .total-label {
+        @media(width > 1000px) {
+            display: none;
+        }
+
+        .total-text {
+            padding-block: 20px;
+            border-block: 1px solid;
+            justify-content: space-between;
+            font-size: 24px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+
+    svg {
+        transform: rotate(var(--rotate, 0));
+        transition: .3s;
+    }
+
+    .total_price {
+        margin-left: auto;
+    }
+}
+
 .discount-code.selection {
     display: grid;
     grid-template-columns: 1fr fit-content(100%);

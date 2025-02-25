@@ -5,6 +5,15 @@
             'main-course selected'
             'upgrades selected'
             '. selected';
+
+        @media (width < 1000px) {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                'title'
+                'main-course'
+                'upgrades'
+                'selected';
+        }
     }
 }
 
