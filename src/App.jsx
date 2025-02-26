@@ -7,6 +7,7 @@ const Payment = React.lazy(() => import( './components/Payment.jsx'));
 const Total = React.lazy(() => import( './components/Total.jsx'));
 const Registration = React.lazy(() => import( './components/Registration.jsx'));
 const SelectCountyAndCourt = React.lazy(() => import( './components/SelectCountyAndCourt.jsx'));
+
 export default function App() {
   const apiUrl = document.querySelector('#root')?.getAttribute('data-apiUrl');
   const websiteId = document.querySelector('#root')?.getAttribute('data-websiteId');
@@ -40,7 +41,7 @@ export default function App() {
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedDeliveryOptions, setSelectedDeliveryOptions] = useState([]);
 
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', repeatPassword: '' });
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
   const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
   const [discount, setDiscount] = useState(0);
@@ -84,7 +85,7 @@ export default function App() {
         setProducts(json.Packages);
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
         setMainCoursePrice(json.Packages[0].Price);
-        setMainCourseId(json.Packages[0].ProductID);
+        setMainCourseId(json.Packages[0].ProductPackageID);
         setMainCourseName(json.Packages[0].Name);
         setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
@@ -151,7 +152,7 @@ export default function App() {
           setProducts([json.Packages[0]]);
           setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
           setMainCoursePrice(json.Packages[0].Price);
-          setMainCourseId(json.Packages[0].ProductID);
+          setMainCourseId(json.Packages[0].ProductPackageID);
           setMainCourseName(json.Packages[0].Name);
           setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
@@ -340,7 +341,7 @@ export default function App() {
   }
 
   return (
-    <div id="main">
+    <div id="main"> {JSON.stringify([ selectedMainCourseDelivery, selectedDeliveryOptions  ])}
 
       <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
 
@@ -420,6 +421,9 @@ export default function App() {
           <Registration
             formData={formData}
             setFormData={setFormData}
+            apiUrl={apiUrl}
+            mainCourseId={mainCourseId}
+            allDeliveryOptions={[mainCourseDeliveryOptions, selectedDeliveryOptions]}
           />
         )}
 

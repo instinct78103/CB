@@ -1,31 +1,72 @@
 import '../styles/registration.scss';
-import Turnstile from 'react-turnstile';
+// import Turnstile from 'react-turnstile';
 import { useState } from 'react';
 
-export default function Registration({ formData, setFormData }) {
+export default function Registration({ formData, setFormData, apiUrl, mainCourseId, allDeliveryOptions }) {
 
-  const [token, setToken] = useState('');
-  const turnstileSiteKey = document.querySelector('#root')?.getAttribute('data-turnstile_sitekey');
+  // const [token, setToken] = useState('');
+  // const turnstileSiteKey = document.querySelector('#root')?.getAttribute('data-turnstile_sitekey');
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!token || !turnstileSiteKey) {
-      alert('CAPTCHA verification failed. Please complete the CAPTCHA.');
+    if (!formData.password || formData.password !== formData.repeatPassword) {
       return;
     }
 
-    setFormData(prevFormData => ({ ...prevFormData, turnstileToken: token }));
+    // if (!token || !turnstileSiteKey) {
+    //   alert('CAPTCHA verification failed. Please complete the CAPTCHA.');
+    //   return;
+    // }
 
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    // setFormData(prevFormData => ({ ...prevFormData, turnstileToken: token }));
+    try {
+      console.log(allDeliveryOptions)
+      const data = new URLSearchParams();
+      data.append("Email", formData.email);
+      data.append("ProductPackageID", mainCourseId);
+      data.append("Password", formData.password);
 
-    const result = await response.json();
+      const resp = await (await fetch(`${apiUrl}/api/customer/verifyAccount`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: data.toString()
+      })).json()
 
-    alert(result.message);
+      if (resp?.Success) {
+        return;
+      }
+
+      const test = await (await fetch(`${apiUrl}/api/customer/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })).json()
+
+      console.log(test)
+
+      // if (!Success) {
+      //   alert('Account already exists');
+      //   return;
+      // }
+
+    } catch (e) {
+      // alert(`${e}. Something went wrong. Please try again.`);
+      // return
+    }
+
+    // const response = await fetch('/api/register', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(formData),
+    // });
+    //
+    // const result = await response.json();
+
   }
 
   return (
@@ -77,15 +118,15 @@ export default function Registration({ formData, setFormData }) {
                   maxLength={48}
                 />
               </div>
-              <div><input type="password" placeholder="Password" /></div>
-              <div><input type="password" placeholder="Repeat Password" /></div>
+              <div><input type="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} /></div>
+              <div><input type="password" placeholder="Repeat Password" value={formData.repeatPassword} onChange={(e) => setFormData({ ...formData, repeatPassword: e.target.value })} /></div>
             </div>
-            <div className="turnstile-widget">
-              <Turnstile
-                sitekey={turnstileSiteKey}
-                onVerify={(token) => setToken(token)}
-              />
-            </div>
+            {/*<div className="turnstile-widget">*/}
+            {/*  <Turnstile*/}
+            {/*    sitekey={turnstileSiteKey}*/}
+            {/*    onVerify={(token) => setToken(token)}*/}
+            {/*  />*/}
+            {/*</div>*/}
           </form>
         </div>
       </div>
