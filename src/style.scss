@@ -47,6 +47,10 @@ input {
     }
 }
 
+.expand {
+    display: none;
+}
+
 .title {
     text-align: center;
     padding: 10px;
@@ -180,6 +184,7 @@ div:has(>.title) {
 .column-total {
     position: sticky;
     top: 20px;
+    --gap: 0;
 
     @media (width < 1000px) {
         bottom: 0
