@@ -2,15 +2,16 @@ import '../styles/registration.scss';
 // import Turnstile from 'react-turnstile';
 import { useState } from 'react';
 
-export default function Registration({ formData, setFormData, apiUrl, mainCourseId, allDeliveryOptions }) {
+export default function Registration({ formData, setFormData, apiUrl, mainCourseId }) {
 
+  const [repeatPassword, setRepeatPassword] = useState('');
   // const [token, setToken] = useState('');
   // const turnstileSiteKey = document.querySelector('#root')?.getAttribute('data-turnstile_sitekey');
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!formData.password || formData.password !== formData.repeatPassword) {
+    if (!formData.Password || formData.Password !== repeatPassword) {
       return;
     }
 
@@ -21,11 +22,10 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
 
     // setFormData(prevFormData => ({ ...prevFormData, turnstileToken: token }));
     try {
-      console.log(allDeliveryOptions)
       const data = new URLSearchParams();
-      data.append("Email", formData.email);
+      data.append("Email", formData.Email);
       data.append("ProductPackageID", mainCourseId);
-      data.append("Password", formData.password);
+      data.append("Password", formData.Password);
 
       const resp = await (await fetch(`${apiUrl}/api/customer/verifyAccount`, {
         method: "POST",
@@ -39,15 +39,24 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
         return;
       }
 
-      const test = await (await fetch(`${apiUrl}/api/customer/register`, {
+      const { signature } = await (await fetch('/wp-json/cyberactive/v1/sign-request/', {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
+        }, body: JSON.stringify({ formData, uri: `${apiUrl}/api/customer/register` })
       })).json()
 
-      console.log(test)
+      console.log(signature)
+
+      const test2 = await (await fetch(`${apiUrl}/api/customer/register`, {
+        method: "POST",
+        headers: {
+          'Authorization': signature,
+          "Content-Type": "application/json"
+        }, body: JSON.stringify(formData)
+      })).json()
+
+      console.log(test2)
 
       // if (!Success) {
       //   alert('Account already exists');
@@ -85,8 +94,8 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                 <input
                   type="text"
                   placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  value={formData.FirstName}
+                  onChange={(e) => setFormData({ ...formData, FirstName: e.target.value })}
                   maxLength={48}
                 />
               </div>
@@ -94,8 +103,8 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                 <input
                   type="text"
                   placeholder="Last Name"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  value={formData.LastName}
+                  onChange={(e) => setFormData({ ...formData, LastName: e.target.value })}
                   maxLength={48}
                 />
               </div>
@@ -103,8 +112,8 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                 <input
                   type="tel"
                   placeholder="Phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  value={formData.Phone}
+                  onChange={(e) => setFormData({ ...formData, Phone: e.target.value })}
                   maxLength={11}
                   inputMode="tel"
                 />
@@ -113,13 +122,13 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                 <input
                   type="email"
                   placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  value={formData.Email}
+                  onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
                   maxLength={48}
                 />
               </div>
-              <div><input type="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} /></div>
-              <div><input type="password" placeholder="Repeat Password" value={formData.repeatPassword} onChange={(e) => setFormData({ ...formData, repeatPassword: e.target.value })} /></div>
+              <div><input type="password" placeholder="Password" value={formData.Password} onChange={(e) => setFormData({ ...formData, Password: e.target.value })} /></div>
+              <div><input type="password" placeholder="Repeat Password" value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} /></div>
             </div>
             {/*<div className="turnstile-widget">*/}
             {/*  <Turnstile*/}

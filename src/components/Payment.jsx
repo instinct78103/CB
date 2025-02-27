@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 export default function Payment(
   {
-    formData: { firstName, lastName, email },
+    formData: { FirstName, LastName, Email },
     isPaymentScriptLoaded,
     setFormData,
     apiUrl,
@@ -22,7 +22,7 @@ export default function Payment(
       async function runPaymentScript() {
         if (paymentGateway === 'intuit') {
           const { initIntuit } = await import('../utils/paymentGateway.js');
-          initIntuit(firstName, lastName, email, setFormData, apiUrl, websiteId, totalPrice, setStep);
+          initIntuit(FirstName, LastName, Email, setFormData, apiUrl, websiteId, totalPrice, setStep);
         } else if (paymentGateway === 'braintree') {
           const { initBraintree } = await import('../utils/paymentGateway.js');
           await initBraintree(apiUrl, websiteId, totalPrice, setFormData, handleNext, products, setStep);

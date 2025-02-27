@@ -1,6 +1,7 @@
 import './style.scss';
 import React, { useState, useEffect } from 'react';
 
+import Loader from './components/Loader.jsx';
 const CourseSelection = React.lazy(() => import( './components/CourseSelection.jsx'));
 const StudentInformation = React.lazy(() => import( './components/StudentInformation.jsx'));
 const Payment = React.lazy(() => import( './components/Payment.jsx'));
@@ -41,7 +42,17 @@ export default function App() {
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedDeliveryOptions, setSelectedDeliveryOptions] = useState([]);
 
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', repeatPassword: '' });
+  const [formData, setFormData] = useState({
+    FirstName: '',
+    LastName: '',
+    Email: '',
+    Phone: '',
+    Password: '',
+    ShipMethods: [],
+    UpgradeProductIDs: [],
+    PartnerPortalID: '',
+    ProductID: '',
+  });
   const [isPaymentScriptLoaded, setIsPaymentScriptLoaded] = useState(false);
   const [isPayLaterChecked, setIsPayLaterChecked] = useState(false);
   const [discount, setDiscount] = useState(0);
@@ -83,9 +94,15 @@ export default function App() {
       try {
         const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${region.RegionID}`)).json();
         setProducts(json.Packages);
+        setFormData(prevState => ({
+          ...prevState,
+          PartnerPortalID: json.Packages[0].PartnerPortalID !== 0 ? json.Packages[0].PartnerPortalID : null,
+          ProductID: json.Packages[0].ProductID,
+        }));
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
+
         setMainCoursePrice(json.Packages[0].Price);
-        setMainCourseId(json.Packages[0].ProductPackageID);
+        setMainCourseId(json.Packages[0].Upgrades[0].ProductID);
         setMainCourseName(json.Packages[0].Name);
         setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
@@ -152,7 +169,7 @@ export default function App() {
           setProducts([json.Packages[0]]);
           setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
           setMainCoursePrice(json.Packages[0].Price);
-          setMainCourseId(json.Packages[0].ProductPackageID);
+          setMainCourseId(json.Packages[0].Upgrades[0].ProductID);
           setMainCourseName(json.Packages[0].Name);
           setMainCourseDeliveryOptions(json.Packages[0].Upgrades[0].ShipOptions);
 
@@ -234,7 +251,7 @@ export default function App() {
       }
       setStep(2);
     } else if (step === 2) {
-      if (!formData.firstName || !formData.lastName || !/\S+@\S+\.\S+/.test(formData.email) || !/^\d{10}$/.test(formData.phone)) {
+      if (!formData.FirstName || !formData.LastName || !/\S+@\S+\.\S+/.test(formData.Email) || !/^\d{10}$/.test(formData.Phone)) {
         alert('Please fill all fields correctly.');
         return;
       }
@@ -295,10 +312,10 @@ export default function App() {
           break;
         case 3:
           tag('data', {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
+            firstName: formData.FirstName,
+            lastName: formData.LastName,
+            email: formData.Email,
+            phone: formData.Phone,
           });
           tag('Registration_Student_Info', { totalPrice });
           break;
@@ -328,20 +345,35 @@ export default function App() {
    * edgeTag -- end
    */
 
+  /**
+   * Update formData
+   */
+  useEffect(() => {
+    if (mainCourseId) {
+      setFormData(prevState => ({
+        ...prevState,
+        ShipMethods: [
+          { ProductID: mainCourseId, ShipMethodPriceId: selectedMainCourseDelivery?.ShipMethodPriceID },
+          ...Object.entries(selectedDeliveryOptions)
+            .map(([key, value]) => ({ ProductID: key, ShipMethodPriceID: value?.ShipMethodPriceID })),
+        ],
+        UpgradeProductIDs: [mainCourseId, ...selectedUpgrades.map(({ ProductID }) => ProductID)],
+      }))
+    }
+  }, [selectedMainCourseDelivery, selectedUpgrades, selectedDeliveryOptions]);
+
   if (loading) {
     return (
       <p style={{ display: 'flex', width: '100%', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50" aria-label="Loading...">
-          <circle cx="25" cy="25" r="20" fill="none" stroke="#014785" strokeWidth="4" strokeDasharray="31.4 31.4" strokeLinecap="round" transform="rotate(-90, 25, 25)">
-            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
-          </circle>
-        </svg>
+        {<Loader />}
       </p>
     );
   }
 
   return (
-    <div id="main"> {JSON.stringify([ selectedMainCourseDelivery, selectedDeliveryOptions  ])}
+    <div id="main">
+
+      {JSON.stringify(formData)}
 
       <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
 
@@ -423,7 +455,7 @@ export default function App() {
             setFormData={setFormData}
             apiUrl={apiUrl}
             mainCourseId={mainCourseId}
-            allDeliveryOptions={[mainCourseDeliveryOptions, selectedDeliveryOptions]}
+            selectedUpgrades={selectedUpgrades}
           />
         )}
 
