@@ -10,7 +10,7 @@
 
     &:has(.expand:checked) {
 
-        --rotate: 0.5turn;
+        --rotate: 0;
 
         .wrap {
             @media(width < 1000px) {
@@ -48,7 +48,7 @@
     }
 
     svg {
-        transform: rotate(var(--rotate, 0));
+        transform: rotate(var(--rotate, 0.5turn));
         transition: .3s;
     }
 

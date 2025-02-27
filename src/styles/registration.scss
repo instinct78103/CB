@@ -7,12 +7,16 @@
         align-items: center;
         text-wrap: balance;
 
-        @media(width < 1000px) {
+        @media(width < 768px) {
             grid-template-columns: 1fr;
             grid-template-areas:
                 'text'
                 'selected'
                 'form';
+        }
+
+        .grid-area--selected {
+            position: static;
         }
 
         .text {

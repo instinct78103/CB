@@ -14,6 +14,12 @@
                 'upgrades'
                 'selected';
         }
+
+        .grid-area--selected {
+            @media (width < 1000px) {
+                grid-row: last;
+            }
+        }
     }
 }
 
