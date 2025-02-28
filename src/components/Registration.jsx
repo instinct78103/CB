@@ -2,7 +2,16 @@ import '../styles/registration.scss';
 // import Turnstile from 'react-turnstile';
 import { useState } from 'react';
 
-export default function Registration({ formData, setFormData, apiUrl, mainCourseId }) {
+export default function Registration(
+  {
+    formData,
+    setFormData,
+    apiUrl,
+    setRegistrationLoading,
+    setRegistrationSuccess,
+    setRegistrationResponse,
+    setStep,
+  }) {
 
   const [repeatPassword, setRepeatPassword] = useState('');
   // const [token, setToken] = useState('');
@@ -11,7 +20,14 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!formData.Password || formData.Password !== repeatPassword) {
+    if ((!formData.Password || formData.Password !== repeatPassword) ||
+      formData.Password.length < 4 ||
+      !/^[A-Za-z]{2,30}$/.test(formData.FirstName) ||
+      !/^[A-Za-z]{2,30}$/.test(formData.LastName) ||
+      !/\S+@\S+\.\S+/.test(formData.Email) ||
+      !/^\d{10}$/.test(formData.Phone)
+    ) {
+      alert('Please fill all fields correctly.');
       return;
     }
 
@@ -21,60 +37,46 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
     // }
 
     // setFormData(prevFormData => ({ ...prevFormData, turnstileToken: token }));
+    setRegistrationLoading(true)
     try {
-      const data = new URLSearchParams();
-      data.append("Email", formData.Email);
-      data.append("ProductPackageID", mainCourseId);
-      data.append("Password", formData.Password);
-
-      const resp = await (await fetch(`${apiUrl}/api/customer/verifyAccount`, {
-        method: "POST",
+      const { signature } = await (await fetch('/wp-json/cyberactive/v1/sign-request/', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: data.toString()
-      })).json()
+          'Content-Type': 'application/json',
+        }, body: JSON.stringify({ formData, uri: `${apiUrl}/api/customer/register` }),
+      })).json();
 
-      if (resp?.Success) {
+      if (!signature) {
+        alert('Something went wrong. Please try again.');
         return;
       }
 
-      const { signature } = await (await fetch('/wp-json/cyberactive/v1/sign-request/', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }, body: JSON.stringify({ formData, uri: `${apiUrl}/api/customer/register` })
-      })).json()
-
-      console.log(signature)
-
-      const test2 = await (await fetch(`${apiUrl}/api/customer/register`, {
-        method: "POST",
+      const data = await (await fetch(`${apiUrl}/api/customer/register`, {
+        method: 'POST',
         headers: {
           'Authorization': signature,
-          "Content-Type": "application/json"
-        }, body: JSON.stringify(formData)
-      })).json()
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...formData }),
+      })).json();
 
-      console.log(test2)
+      setRegistrationLoading(false);
 
-      // if (!Success) {
-      //   alert('Account already exists');
-      //   return;
-      // }
+      if (!data?.Success) {
+        alert(data?.Errors[0]?.Messages[0]);
+        return;
+      }
+
+      setRegistrationSuccess(true);
+      setRegistrationResponse(data);
+      setStep(5);
 
     } catch (e) {
-      // alert(`${e}. Something went wrong. Please try again.`);
-      // return
+      console.log(e);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setRegistrationLoading(false);
     }
-
-    // const response = await fetch('/api/register', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(formData),
-    // });
-    //
-    // const result = await response.json();
 
   }
 
@@ -96,7 +98,7 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                   placeholder="First Name"
                   value={formData.FirstName}
                   onChange={(e) => setFormData({ ...formData, FirstName: e.target.value })}
-                  maxLength={48}
+                  maxLength={30}
                 />
               </div>
               <div>
@@ -105,7 +107,7 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                   placeholder="Last Name"
                   value={formData.LastName}
                   onChange={(e) => setFormData({ ...formData, LastName: e.target.value })}
-                  maxLength={48}
+                  maxLength={30}
                 />
               </div>
               <div>
@@ -114,7 +116,7 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                   placeholder="Phone"
                   value={formData.Phone}
                   onChange={(e) => setFormData({ ...formData, Phone: e.target.value })}
-                  maxLength={11}
+                  maxLength={10}
                   inputMode="tel"
                 />
               </div>
@@ -124,11 +126,17 @@ export default function Registration({ formData, setFormData, apiUrl, mainCourse
                   placeholder="Email"
                   value={formData.Email}
                   onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
-                  maxLength={48}
+                  maxLength={30}
                 />
               </div>
-              <div><input type="password" placeholder="Password" value={formData.Password} onChange={(e) => setFormData({ ...formData, Password: e.target.value })} /></div>
-              <div><input type="password" placeholder="Repeat Password" value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} /></div>
+              <div>
+                <input type="password" placeholder="Password" value={formData.Password} onChange={(e) => setFormData({
+                  ...formData,
+                  Password: e.target.value,
+                })} /></div>
+              <div>
+                <input type="password" placeholder="Repeat Password" value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} />
+              </div>
             </div>
             {/*<div className="turnstile-widget">*/}
             {/*  <Turnstile*/}

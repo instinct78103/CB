@@ -15,28 +15,28 @@ export default function StudentInformation(
         <div className="wrap">
           <div>
             <input
-              type="text" placeholder="First Name" name="firstname" maxLength={48}
+              type="text" placeholder="First Name" name="firstname" maxLength={30}
               value={formData.FirstName}
               onChange={(e) => setFormData({ ...formData, FirstName: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="text" placeholder="Last Name" name="lastname" maxLength={48}
+              type="text" placeholder="Last Name" name="lastname" maxLength={30}
               value={formData.LastName}
               onChange={(e) => setFormData({ ...formData, LastName: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="email" placeholder="Email" name="email" maxLength={48}
+              type="email" placeholder="Email" name="email" maxLength={30}
               value={formData.Email}
               onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
             />
           </div>
           <div>
             <input
-              type="tel" placeholder="Phone" name="phone" maxLength={11}
+              type="tel" placeholder="Phone" name="phone" maxLength={10}
               value={formData.Phone}
               onChange={(e) => setFormData({ ...formData, Phone: e.target.value })}
             />

@@ -10,7 +10,7 @@ export default function Total(
     selectedMainCourseDelivery,
     totalPrice,
     step,
-    mainCourseId,
+    packageId,
     regionId,
     apiUrl,
     discount,
@@ -28,7 +28,7 @@ export default function Total(
 
     const url = new URL(`${apiUrl}/api/customer/verifyOfferCode`);
     url.searchParams.set('OfferCode', coupon);
-    url.searchParams.set('ProductID', mainCourseId);
+    url.searchParams.set('ProductID', packageId);
     url.searchParams.set('RegionID', regionId);
 
     setIsCouponLoading(true);
@@ -45,7 +45,7 @@ export default function Total(
   }
 
   return (
-    <div className="column-total grid-area--selected" style={{'--content-size': `${step === 4 ? '1fr' : ''}`, position: `${step === 4 ? 'static' : 'sticky'}`}}>
+    <div className="column-total grid-area--selected" style={{'--content-size': `${step === 4 ? '1fr' : ''}`}}>
 
       {step < 3 && <div className="total-label">
         <label className="total-text">

@@ -86,6 +86,10 @@ div:has(> :is(.next, .paylater_next)) {
     min-width: fit-content;
     width: min(300px, 100%);
     margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .products-list {

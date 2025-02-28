@@ -42,6 +42,10 @@ export default function App() {
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedDeliveryOptions, setSelectedDeliveryOptions] = useState([]);
 
+  const [registrationLoading, setRegistrationLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registrationResponse, setRegistrationResponse] = useState(null);
+
   const [formData, setFormData] = useState({
     FirstName: '',
     LastName: '',
@@ -75,6 +79,7 @@ export default function App() {
            }) => RegionCode.toLowerCase() === currentState || RegionName.toLowerCase() === currentState,
         );
         setRegion(region);
+        setFormData(prevState => ({...prevState, RegionID: region.RegionID}))
       } catch (e) {
         console.warn('Can\'t find region for state: ' + currentState);
       }
@@ -94,11 +99,14 @@ export default function App() {
       try {
         const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${region.RegionID}`)).json();
         setProducts(json.Packages);
+
         setFormData(prevState => ({
           ...prevState,
           PartnerPortalID: json.Packages[0].PartnerPortalID !== 0 ? json.Packages[0].PartnerPortalID : null,
           ProductID: json.Packages[0].ProductID,
+          ProductPackageID: json.Packages[0].ProductPackageID,
         }));
+
         setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
 
         setMainCoursePrice(json.Packages[0].Price);
@@ -159,7 +167,7 @@ export default function App() {
   }, [countyId]);
 
   /**
-   * todo: remove duplicate code
+   * todo: remove duplicate code (see `fetchStateProducts`)
    */
   useEffect(() => {
     if (courtId) {
@@ -167,7 +175,16 @@ export default function App() {
         try {
           const json = await (await fetch(`${apiUrl}/api/package?websiteid=${websiteId}&regionid=${courtId}`)).json();
           setProducts([json.Packages[0]]);
+
+          setFormData(prevState => ({
+            ...prevState,
+            PartnerPortalID: json.Packages[0].PartnerPortalID !== 0 ? json.Packages[0].PartnerPortalID : null,
+            ProductID: json.Packages[0].ProductID,
+            ProductPackageID: json.Packages[0].ProductPackageID,
+          }));
+
           setUpgrades(json.Packages[0].Upgrades.filter((item, key) => key > 0));
+
           setMainCoursePrice(json.Packages[0].Price);
           setMainCourseId(json.Packages[0].Upgrades[0].ProductID);
           setMainCourseName(json.Packages[0].Name);
@@ -251,7 +268,7 @@ export default function App() {
       }
       setStep(2);
     } else if (step === 2) {
-      if (!formData.FirstName || !formData.LastName || !/\S+@\S+\.\S+/.test(formData.Email) || !/^\d{10}$/.test(formData.Phone)) {
+      if (!/^[A-Za-z]{2,30}$/.test(formData.FirstName) || !/^[A-Za-z]{2,30}$/.test(formData.LastName) || !/\S+@\S+\.\S+/.test(formData.Email) || !/^\d{10}$/.test(formData.Phone)) {
         alert('Please fill all fields correctly.');
         return;
       }
@@ -364,16 +381,14 @@ export default function App() {
 
   if (loading) {
     return (
-      <p style={{ display: 'flex', width: '100%', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ display: 'flex', width: '100%', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
         {<Loader />}
-      </p>
+      </div>
     );
   }
 
   return (
     <div id="main">
-
-      {JSON.stringify(formData)}
 
       <div className={`grid ${step === 1 ? 'course-selection' : ''}${step === 2 ? 'student-information' : ''}${step === 3 ? 'payment' : ''}${step === 4 ? 'registration' : ''}`}>
 
@@ -433,7 +448,7 @@ export default function App() {
           />
         )}
 
-        {products.length > 0 && (
+        {products.length > 0 && step < 5 && (
           <Total
             products={products}
             selectedUpgrades={selectedUpgrades}
@@ -441,7 +456,7 @@ export default function App() {
             selectedMainCourseDelivery={selectedMainCourseDelivery}
             totalPrice={totalPrice}
             step={step}
-            mainCourseId={mainCourseId}
+            packageId={formData.ProductID}
             regionId={region.RegionID}
             apiUrl={apiUrl}
             discount={discount}
@@ -454,10 +469,29 @@ export default function App() {
             formData={formData}
             setFormData={setFormData}
             apiUrl={apiUrl}
-            mainCourseId={mainCourseId}
+            productPackageId={formData.ProductPackageID}
             selectedUpgrades={selectedUpgrades}
+            setRegistrationLoading={setRegistrationLoading}
+            setRegistrationSuccess={setRegistrationSuccess}
+            setRegistrationResponse={setRegistrationResponse}
+            setStep={setStep}
           />
         )}
+
+        {
+          step === 5 && registrationSuccess && (
+            <>
+              <p>Success</p>
+              <p>{JSON.stringify(registrationResponse)}</p>
+            </>
+          )
+        }
+
+        {
+          step === 5 && !registrationSuccess && (
+            'Error'
+          )
+        }
 
       </div>
 
@@ -466,7 +500,11 @@ export default function App() {
         {step === 3 && <button className="next">Complete Payment</button>}
         {isPayLaterChecked && step === 3 &&
           <button className="paylater_next" onClick={() => setStep(4)}>Complete Registration</button>}
-        {step === 4 && <button className="next" form={'user-registration'}>Complete Registration</button>}
+        {step === 4 && (
+          <button className="next" form="user-registration" disabled={registrationLoading}>
+            {registrationLoading ? <Loader color={'#fff'} size={20}/> : 'Complete Registration'}
+          </button>
+        )}
       </div>
 
     </div>
